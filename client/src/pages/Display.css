@@ -1,0 +1,342 @@
+.display-home-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.display-home-btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.display-header-logo {
+  height: 44px;
+  width: auto;
+  display: block;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.display {
+  min-height: 100vh;
+  background-color: var(--color-background);
+  background-image: linear-gradient(rgba(0,0,0,0.82), rgba(0,0,0,0.82)), url('/background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-family-base);
+}
+
+.display-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  padding: 12px 32px;
+  background: var(--color-surface);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.display-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.display-dots {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.display-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.display-dot.active {
+  background: var(--color-primary);
+}
+
+.display-update {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.display-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 32px 48px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.display-main {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.display-sidebar {
+  overflow: hidden;
+}
+
+.display-section {
+  height: 100%;
+}
+
+.display-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--color-text);
+}
+
+.display-empty {
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 40px;
+}
+
+/* Leaderboard */
+.display-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.display-lb-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  font-size: 1.2rem;
+}
+
+.display-lb-row {
+  border-left: 4px solid var(--color-success);
+}
+
+.display-lb-row--reserve {
+  border-left-color: rgba(255, 255, 255, 0.15);
+  opacity: 0.6;
+}
+
+.display-lb-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.display-lb-divider::before,
+.display-lb-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.display-lb-rank {
+  font-size: 1.4rem;
+  min-width: 50px;
+  font-weight: 700;
+}
+
+.display-lb-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.display-lb-time {
+  font-family: monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+/* Bracket Tree */
+.display-section--wide {
+  height: 100%;
+}
+
+.bracket-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bracket-semis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.bracket-final-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.bracket-final-row .bracket-col {
+  width: 50%;
+}
+
+.bracket-down-arrow {
+  font-size: 1.6rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bracket-col {
+  flex: 1;
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: 20px 24px;
+  min-width: 0;
+}
+
+.bracket-col--final {
+  flex: 1.2;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 24px rgba(232, 0, 28, 0.15);
+}
+
+.bracket-col-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+}
+
+.bracket-col--final .bracket-col-title {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+}
+
+.bracket-col-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bracket-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  font-size: 1.1rem;
+}
+
+.bracket-entry--advances {
+  border: 2px solid var(--color-primary);
+}
+
+.bracket-entry--winner {
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.bracket-crown {
+  font-size: 1.3rem;
+}
+
+.bracket-entry-pos {
+  font-family: monospace;
+  color: var(--color-text-muted);
+  min-width: 24px;
+  font-size: 0.9rem;
+}
+
+.bracket-entry-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.bracket-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 20px;
+  font-size: 1.5rem;
+}
+
+/* Schedule */
+.display-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.display-schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 20px;
+  border-radius: var(--border-radius);
+  font-size: 1.1rem;
+  transition: background 0.2s;
+}
+
+.display-schedule-row.past {
+  opacity: 0.4;
+}
+
+.display-schedule-row.current {
+  background: rgba(232,0,28,0.15);
+  border: 1px solid rgba(232,0,28,0.3);
+}
+
+.display-schedule-time {
+  font-family: monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  min-width: 11ch;
+  color: var(--color-primary);
+}
+
+.display-schedule-event {
+  flex: 1;
+  font-weight: 500;
+}
+
+.display-schedule-now {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
