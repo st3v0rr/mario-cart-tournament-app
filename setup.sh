@@ -2,7 +2,7 @@
 # Quick setup script for development
 set -e
 
-PROJ=/home/stefan/Code/mario-cart-doag
+PROJ="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== Mario Kart Tournament App Setup ==="
 
