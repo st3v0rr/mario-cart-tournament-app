@@ -60,6 +60,20 @@
   color: var(--color-text-muted);
 }
 
+.login-github-link {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-md);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.login-github-link:hover {
+  opacity: 1;
+}
+
 .rate-limit-notice {
   display: flex;
   align-items: center;
