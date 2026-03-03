@@ -32,7 +32,7 @@ router.get('/tickets', (req, res) => {
 router.post(
   '/tickets',
   [
-    body('first_name').trim().notEmpty().withMessage('First name is required'),
+    body('first_name').trim().notEmpty().isLength({ max: 100 }).withMessage('First name is required and must not exceed 100 characters'),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -79,7 +79,7 @@ router.post('/tickets/import', (req, res) => {
   const insertMany = db.transaction((rows) => {
     let count = 0;
     for (const row of rows) {
-      if (!row.first_name || !/^\d{5}$/.test(row.ticket_number)) continue;
+      if (!row.first_name || typeof row.first_name !== 'string' || row.first_name.length > 100 || !/^\d{5}$/.test(row.ticket_number)) continue;
       const info = insert.run(uuidv4(), row.first_name.trim(), row.ticket_number.trim());
       count += info.changes;
     }
@@ -509,7 +509,13 @@ router.delete('/setup/slots', (req, res) => {
 });
 
 // DELETE /api/admin/setup/database — löscht alle Daten aus allen Tabellen
-router.delete('/setup/database', (req, res) => {
+router.delete(
+  '/setup/database',
+  [body('confirm').equals('RESET').withMessage('confirm must be exactly "RESET"')],
+  (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
   const reset = db.transaction(() => {
     db.prepare('DELETE FROM bracket_entries').run();
     db.prepare('DELETE FROM slots').run();

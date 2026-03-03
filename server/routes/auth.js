@@ -40,7 +40,7 @@ router.post(
   '/login',
   authLimiter,
   [
-    body('first_name').trim().notEmpty().withMessage('First name is required'),
+    body('first_name').trim().notEmpty().isLength({ max: 100 }).withMessage('First name is required and must not exceed 100 characters'),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
