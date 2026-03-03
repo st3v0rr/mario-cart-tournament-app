@@ -42,6 +42,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Trust the reverse proxy (Caddy) so rate limiting and IP detection work correctly
+if (isProduction) app.set('trust proxy', 1);
+
 // Validate critical environment variables at startup
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.error('[FATAL] JWT_SECRET must be set and at least 32 characters long');
