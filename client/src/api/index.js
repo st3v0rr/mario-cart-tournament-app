@@ -24,6 +24,8 @@ async function request(method, path, body) {
 
 export const api = {
   // Auth
+  register: (nick_name, nick_name_confirm, ticket_number, ticket_number_confirm) =>
+    request('POST', '/auth/register', { nick_name, nick_name_confirm, ticket_number, ticket_number_confirm }),
   login: (nick_name, ticket_number) =>
     request('POST', '/auth/login', { nick_name, ticket_number }),
   adminLogin: (username, password) =>
@@ -51,8 +53,6 @@ export const api = {
   adminGetTickets: () => request('GET', '/admin/tickets'),
   adminAddTicket: (nick_name, ticket_number) =>
     request('POST', '/admin/tickets', { nick_name, ticket_number }),
-  adminImportTickets: (entries) =>
-    request('POST', '/admin/tickets/import', { entries }),
   adminDeleteTicket: (id) => request('DELETE', `/admin/tickets/${id}`),
   adminGetSlots: () => request('GET', '/admin/slots'),
   adminUpdateSlot: (id, data) => request('PATCH', `/admin/slots/${id}`, data),

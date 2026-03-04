@@ -32,7 +32,8 @@ router.get('/tickets', (req, res) => {
 router.post(
   '/tickets',
   [
-    body('nick_name').trim().notEmpty().isLength({ max: 100 }).withMessage('Nick name is required and must not exceed 100 characters'),
+    body('nick_name').trim().isLength({ min: 3, max: 30 }).withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
+      .matches(/^[a-zA-Z0-9_\-.]+$/).withMessage('Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -61,34 +62,6 @@ router.post(
     res.status(201).json({ ok: true, id });
   }
 );
-
-// POST /api/admin/tickets/import — CSV import
-router.post('/tickets/import', (req, res) => {
-  const { entries } = req.body;
-  if (!Array.isArray(entries) || entries.length === 0) {
-    return res.status(400).json({ error: 'entries array is required' });
-  }
-  if (entries.length > 1000) {
-    return res.status(400).json({ error: 'Maximum 1000 entries per import' });
-  }
-
-  const insert = db.prepare(
-    'INSERT OR IGNORE INTO ticket_list (id, nick_name, ticket_number, is_walk_up, claimed) VALUES (?, ?, ?, 0, 0)'
-  );
-
-  const insertMany = db.transaction((rows) => {
-    let count = 0;
-    for (const row of rows) {
-      if (!row.nick_name || typeof row.nick_name !== 'string' || row.nick_name.length > 100 || !/^\d{5}$/.test(row.ticket_number)) continue;
-      const info = insert.run(uuidv4(), row.nick_name.trim(), row.ticket_number.trim());
-      count += info.changes;
-    }
-    return count;
-  });
-
-  const count = insertMany(entries);
-  res.json({ ok: true, imported: count });
-});
 
 // DELETE /api/admin/tickets/:id
 router.delete(

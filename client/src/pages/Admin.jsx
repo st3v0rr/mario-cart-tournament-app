@@ -35,7 +35,7 @@ function TimeSelect({ value, onChange, required, style }) {
   );
 }
 
-const TABS = ['Tickets', 'Slots', 'Teilnehmer', 'Bracket', 'CSV Import'];
+const TABS = ['Tickets', 'Slots', 'Teilnehmer', 'Bracket'];
 
 export default function Admin() {
   const [tab, setTab] = useState('Tickets');
@@ -63,7 +63,6 @@ export default function Admin() {
       <div className="admin-content">
         {tab === 'Setup' && <SetupTab />}
         {tab === 'Tickets' && <TicketsTab />}
-        {tab === 'CSV Import' && <CsvImportTab />}
         {tab === 'Slots' && <SlotsTab />}
         {tab === 'Bracket' && <BracketTab />}
         {tab === 'Teilnehmer' && <ParticipantsTab />}
@@ -493,7 +492,7 @@ function TicketsTab() {
         <div className="card" style={{ maxWidth: 400 }}>
           <h2>Walk-up eintragen</h2>
           <form onSubmit={addTicket} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-            <input className="input" placeholder="Nickname" value={nickName} onChange={(e) => setNickName(e.target.value)} required />
+            <input className="input" placeholder="Nickname" value={nickName} onChange={(e) => setNickName(e.target.value)} required minLength={3} maxLength={30} />
             <input className="input" placeholder="Ticket-Nr. (5 Ziffern)" value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value.replace(/\D/g, '').slice(0, 5))}
               pattern="\d{5}" required />
@@ -531,53 +530,6 @@ function TicketsTab() {
             ))}
           </tbody>
         </table>
-      </div>
-    </div>
-  );
-}
-
-// --- CSV Import ---
-function CsvImportTab() {
-  const [csvText, setCsvText] = useState('');
-  const [msg, setMsg] = useState('');
-  const [error, setError] = useState('');
-
-  const importCsv = async () => {
-    setError(''); setMsg('');
-    const lines = csvText.trim().split('\n').filter(Boolean);
-    const entries = lines.map((line) => {
-      const [fn, tn] = line.split(',').map((s) => s.trim());
-      return { nick_name: fn, ticket_number: tn };
-    });
-    try {
-      const res = await api.adminImportTickets(entries);
-      setMsg(`${res.imported} Einträge importiert.`);
-      setCsvText('');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  return (
-    <div>
-      <div className="card" style={{ maxWidth: 500 }}>
-        <h2>CSV Import</h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-sm)' }}>
-          Format: Nickname,Ticketnummer (eine Zeile pro Eintrag)
-        </p>
-        <textarea
-          className="input"
-          rows={10}
-          placeholder={"Max,12345\nLisa,67890"}
-          value={csvText}
-          onChange={(e) => setCsvText(e.target.value)}
-          style={{ resize: 'vertical', fontFamily: 'monospace' }}
-        />
-        {msg && <p className="success-msg" style={{ marginTop: 'var(--spacing-sm)' }}>{msg}</p>}
-        {error && <p className="error-msg" style={{ marginTop: 'var(--spacing-sm)' }}>{error}</p>}
-        <button className="btn btn-primary" style={{ marginTop: 'var(--spacing-sm)', width: '100%' }} onClick={importCsv}>
-          Importieren
-        </button>
       </div>
     </div>
   );

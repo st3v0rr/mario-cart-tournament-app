@@ -5,10 +5,13 @@ const logoSrc = '/logo.png';
 import './Login.css';
 
 export default function Login() {
-  const { auth, login } = useAuth();
+  const { auth, login, register } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [nickName, setNickName] = useState('');
+  const [nickNameConfirm, setNickNameConfirm] = useState('');
   const [ticketNumber, setTicketNumber] = useState('');
+  const [ticketNumberConfirm, setTicketNumberConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [rateLimitSeconds, setRateLimitSeconds] = useState(0);
@@ -23,12 +26,34 @@ export default function Login() {
     navigate(auth.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
   }
 
+  const switchMode = (newMode) => {
+    setMode(newMode);
+    setError('');
+    setRateLimitSeconds(0);
+    setNickNameConfirm('');
+    setTicketNumberConfirm('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (isRegister) {
+      if (nickName !== nickNameConfirm) {
+        setError('Die Nicknames stimmen nicht überein');
+        return;
+      }
+      if (ticketNumber !== ticketNumberConfirm) {
+        setError('Die Ticket-Nummern stimmen nicht überein');
+        return;
+      }
+    }
     setLoading(true);
     try {
-      await login(nickName, ticketNumber);
+      if (mode === 'register') {
+        await register(nickName, nickNameConfirm, ticketNumber, ticketNumberConfirm);
+      } else {
+        await login(nickName, ticketNumber);
+      }
       navigate('/dashboard', { replace: true });
     } catch (err) {
       if (err.retryAfter) {
@@ -42,40 +67,100 @@ export default function Login() {
     }
   };
 
+  const isRegister = mode === 'register';
+
   return (
     <div className="login-page">
       <div className="login-card card">
         <div className="login-logo"><img src={logoSrc} alt="Mario Kart Turnier" /></div>
         <h1>Mario Kart Turnier</h1>
-        <p className="login-subtitle">Melde dich mit deinem Namen und Ticket-Code an</p>
+        <p className="login-subtitle">
+          {isRegister
+            ? 'Wähle deinen Nickname und gib deine 5-stellige Ticket-Nummer ein'
+            : 'Melde dich mit deinem Namen und Ticket-Code an'}
+        </p>
         <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="nickName">Nickname</label>
-            <input
-              id="nickName"
-              className="input"
-              type="text"
-              placeholder="Dein Nickname"
-              value={nickName}
-              onChange={(e) => setNickName(e.target.value)}
-              required
-              autoComplete="given-name"
-            />
+          <div className={isRegister ? 'form-segment' : ''}>
+            {isRegister && (
+              <p className="register-rules">
+                Bitte wähle einen respektvollen Nickname. Anstößige, beleidigende oder unangemessene Namen sind nicht erlaubt und können zum Ausschluss vom Turnier führen.
+                <br /><br />
+                Erlaubt: Buchstaben (a–z, A–Z), Zahlen (0–9), Unterstrich (_), Bindestrich (-) und Punkt (.) · 3–30 Zeichen
+              </p>
+            )}
+            <div className="form-group">
+              <label htmlFor="nickName">Nickname</label>
+              <input
+                id="nickName"
+                className="input"
+                type="text"
+                placeholder="Dein Nickname"
+                value={nickName}
+                onChange={(e) => setNickName(e.target.value)}
+                required
+                minLength={3}
+                maxLength={30}
+                pattern="[a-zA-Z0-9_\-.]{3,30}"
+                title="Buchstaben, Zahlen, _ - . erlaubt (3–30 Zeichen)"
+                autoComplete="given-name"
+              />
+            </div>
+            {isRegister && (
+              <div className="form-group">
+                <label htmlFor="nickNameConfirm">Nickname bestätigen</label>
+                <input
+                  id="nickNameConfirm"
+                  className="input"
+                  type="text"
+                  placeholder="Nickname wiederholen"
+                  value={nickNameConfirm}
+                  onChange={(e) => setNickNameConfirm(e.target.value)}
+                  required
+                  minLength={3}
+                  maxLength={30}
+                  autoComplete="off"
+                />
+              </div>
+            )}
           </div>
-          <div className="form-group">
-            <label htmlFor="ticketNumber">Ticket-Nummer (5 Ziffern)</label>
-            <input
-              id="ticketNumber"
-              className="input"
-              type="text"
-              placeholder="12345"
-              value={ticketNumber}
-              onChange={(e) => setTicketNumber(e.target.value.replace(/\D/g, '').slice(0, 5))}
-              maxLength={5}
-              pattern="\d{5}"
-              required
-              inputMode="numeric"
-            />
+          <div className={isRegister ? 'form-segment' : ''}>
+            {isRegister && (
+              <p className="input-hint">
+                Die Ticket-Nummer findest du auf deinem ausgedruckten Konferenz-Ticket oder im DOAG-Profil unter <em>Meine Aktivitäten → Tickets &amp; Übernachtungen → Teilnehmerdetails</em>.
+              </p>
+            )}
+            <div className="form-group">
+              <label htmlFor="ticketNumber">Ticket-Nummer (5 Ziffern)</label>
+              <input
+                id="ticketNumber"
+                className="input"
+                type="text"
+                placeholder="12345"
+                value={ticketNumber}
+                onChange={(e) => setTicketNumber(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                maxLength={5}
+                pattern="\d{5}"
+                required
+                inputMode="numeric"
+              />
+            </div>
+            {isRegister && (
+              <div className="form-group">
+                <label htmlFor="ticketNumberConfirm">Ticket-Nummer bestätigen</label>
+                <input
+                  id="ticketNumberConfirm"
+                  className="input"
+                  type="text"
+                  placeholder="12345"
+                  value={ticketNumberConfirm}
+                  onChange={(e) => setTicketNumberConfirm(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  maxLength={5}
+                  pattern="\d{5}"
+                  required
+                  inputMode="numeric"
+                />
+              </div>
+            )}
           </div>
           {error && <p className="error-msg">{error}</p>}
           {rateLimitSeconds > 0 && (
@@ -90,9 +175,26 @@ export default function Login() {
             disabled={loading || rateLimitSeconds > 0}
             style={{ width: '100%' }}
           >
-            {loading ? 'Anmelden...' : rateLimitSeconds > 0 ? `Warte ${rateLimitSeconds}s` : 'Anmelden'}
+            {loading
+              ? (isRegister ? 'Registrieren...' : 'Anmelden...')
+              : rateLimitSeconds > 0
+              ? `Warte ${rateLimitSeconds}s`
+              : (isRegister ? 'Registrieren' : 'Anmelden')}
           </button>
         </form>
+        <div className="login-mode-switch">
+          {isRegister ? (
+            <>
+              Bereits registriert?{' '}
+              <button className="btn-link" onClick={() => switchMode('login')}>Anmelden</button>
+            </>
+          ) : (
+            <>
+              Noch kein Account?{' '}
+              <button className="btn-link" onClick={() => switchMode('register')}>Jetzt registrieren</button>
+            </>
+          )}
+        </div>
         <div className="login-links">
           <Link to="/leaderboard">Rangliste</Link>
           <span>·</span>

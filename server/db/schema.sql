@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS ticket_list (
   id TEXT PRIMARY KEY,
-  nick_name TEXT NOT NULL,
+  nick_name TEXT NOT NULL UNIQUE,
   ticket_number TEXT NOT NULL UNIQUE,
   is_walk_up INTEGER NOT NULL DEFAULT 0,
   claimed INTEGER NOT NULL DEFAULT 0

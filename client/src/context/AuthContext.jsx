@@ -14,6 +14,12 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
+  const register = async (nickName, nickNameConfirm, ticketNumber, ticketNumberConfirm) => {
+    const data = await api.register(nickName, nickNameConfirm, ticketNumber, ticketNumberConfirm);
+    setAuth({ authenticated: true, role: 'participant', name: data.name });
+    return data;
+  };
+
   const login = async (nickName, ticketNumber) => {
     const data = await api.login(nickName, ticketNumber);
     setAuth({ authenticated: true, role: 'participant', name: data.name });
@@ -31,7 +37,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, loading, login, adminLogin, logout }}>
+    <AuthContext.Provider value={{ auth, loading, register, login, adminLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );
