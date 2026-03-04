@@ -8,9 +8,7 @@ if (existing.count > 0) {
   process.exit(0);
 }
 
-const insert = db.prepare(
-  'INSERT INTO slots (id, start_time, status) VALUES (?, ?, ?)'
-);
+const insert = db.prepare('INSERT INTO slots (id, start_time, status) VALUES (?, ?, ?)');
 
 const seedSlots = db.transaction(() => {
   const startHour = 10;

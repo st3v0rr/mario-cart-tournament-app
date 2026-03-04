@@ -12,17 +12,13 @@ router.get('/', requireAuth, (req, res) => {
 
   const participantId = req.user.sub;
 
-  const participant = db
-    .prepare('SELECT * FROM participants WHERE id = ?')
-    .get(participantId);
+  const participant = db.prepare('SELECT * FROM participants WHERE id = ?').get(participantId);
 
   if (!participant) {
     return res.status(404).json({ error: 'Participant not found' });
   }
 
-  const slot = db
-    .prepare('SELECT * FROM slots WHERE participant_id = ?')
-    .get(participantId);
+  const slot = db.prepare('SELECT * FROM slots WHERE participant_id = ?').get(participantId);
 
   // Leaderboard rank
   let rank = null;

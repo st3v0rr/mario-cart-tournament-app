@@ -1,4 +1,4 @@
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, _next) {
   if (process.env.NODE_ENV !== 'production') {
     console.error('[ERROR]', err.message, err.stack);
   } else {

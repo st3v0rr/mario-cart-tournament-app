@@ -49,9 +49,18 @@ router.post(
   '/register',
   registerLimiter,
   [
-    body('nick_name').trim().isLength({ min: 3, max: 30 }).withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
-      .matches(/^[a-zA-Z0-9_\-.]+$/).withMessage('Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'),
-    body('nick_name_confirm').trim().notEmpty().withMessage('Nickname-Bestätigung ist erforderlich'),
+    body('nick_name')
+      .trim()
+      .isLength({ min: 3, max: 30 })
+      .withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
+      .matches(/^[a-zA-Z0-9_\-.]+$/)
+      .withMessage(
+        'Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'
+      ),
+    body('nick_name_confirm')
+      .trim()
+      .notEmpty()
+      .withMessage('Nickname-Bestätigung ist erforderlich'),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -121,8 +130,14 @@ router.post(
   '/login',
   authLimiter,
   [
-    body('nick_name').trim().isLength({ min: 3, max: 30 }).withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
-      .matches(/^[a-zA-Z0-9_\-.]+$/).withMessage('Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'),
+    body('nick_name')
+      .trim()
+      .isLength({ min: 3, max: 30 })
+      .withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
+      .matches(/^[a-zA-Z0-9_\-.]+$/)
+      .withMessage(
+        'Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'
+      ),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -137,9 +152,7 @@ router.post(
     const { nick_name, ticket_number } = req.body;
 
     const entry = db
-      .prepare(
-        'SELECT * FROM ticket_list WHERE ticket_number = ? AND LOWER(nick_name) = LOWER(?)'
-      )
+      .prepare('SELECT * FROM ticket_list WHERE ticket_number = ? AND LOWER(nick_name) = LOWER(?)')
       .get(ticket_number, nick_name);
 
     if (!entry) {
@@ -202,13 +215,15 @@ router.post(
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    console.log('[AUDIT] admin_login_success', { ip: req.ip, username, ts: new Date().toISOString() });
+    console.log('[AUDIT] admin_login_success', {
+      ip: req.ip,
+      username,
+      ts: new Date().toISOString(),
+    });
 
-    const token = jwt.sign(
-      { sub: 'admin', role: 'admin' },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = jwt.sign({ sub: 'admin', role: 'admin' }, process.env.JWT_SECRET, {
+      expiresIn: '24h',
+    });
 
     res.cookie('token', token, cookieOpts);
     res.json({ ok: true, role: 'admin' });

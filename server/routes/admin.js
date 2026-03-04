@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 const { requireAdmin } = require('../middleware/auth');
 const db = require('../db');
@@ -15,7 +15,11 @@ router.use(requireAdmin);
 
 // GET /api/admin/tickets
 router.get('/tickets', (req, res) => {
-  console.log('[AUDIT] admin_tickets_read', { ip: req.ip, adminId: req.user.sub, ts: new Date().toISOString() });
+  console.log('[AUDIT] admin_tickets_read', {
+    ip: req.ip,
+    adminId: req.user.sub,
+    ts: new Date().toISOString(),
+  });
   const tickets = db
     .prepare(
       `SELECT tl.*, s.race_time
@@ -32,8 +36,14 @@ router.get('/tickets', (req, res) => {
 router.post(
   '/tickets',
   [
-    body('nick_name').trim().isLength({ min: 3, max: 30 }).withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
-      .matches(/^[a-zA-Z0-9_\-.]+$/).withMessage('Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'),
+    body('nick_name')
+      .trim()
+      .isLength({ min: 3, max: 30 })
+      .withMessage('Nickname muss zwischen 3 und 30 Zeichen lang sein')
+      .matches(/^[a-zA-Z0-9_\-.]+$/)
+      .withMessage(
+        'Nickname darf nur Buchstaben, Zahlen, Unterstrich (_), Bindestrich (-) und Punkt (.) enthalten'
+      ),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -68,29 +78,34 @@ router.delete(
   '/tickets/:id',
   [param('id').isUUID().withMessage('Invalid ticket ID')],
   (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-  const ticket = db
-    .prepare('SELECT * FROM ticket_list WHERE id = ?')
-    .get(req.params.id);
-  if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    const ticket = db.prepare('SELECT * FROM ticket_list WHERE id = ?').get(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
 
-  const hasResult = db
-    .prepare(
-      `SELECT s.id FROM participants p
+    const hasResult = db
+      .prepare(
+        `SELECT s.id FROM participants p
        JOIN slots s ON s.participant_id = p.id
        WHERE p.ticket_list_id = ? AND s.status = 'completed' AND s.race_time IS NOT NULL`
-    )
-    .get(req.params.id);
-  if (hasResult) {
-    return res.status(409).json({ error: 'Teilnehmer hat ein gültiges Ergebnis und kann nicht gelöscht werden' });
-  }
+      )
+      .get(req.params.id);
+    if (hasResult) {
+      return res
+        .status(409)
+        .json({ error: 'Teilnehmer hat ein gültiges Ergebnis und kann nicht gelöscht werden' });
+    }
 
-  db.prepare('DELETE FROM ticket_list WHERE id = ?').run(req.params.id);
-  console.log('[AUDIT] admin_ticket_delete', { ip: req.ip, ticketId: req.params.id, ts: new Date().toISOString() });
-  res.json({ ok: true });
-});
+    db.prepare('DELETE FROM ticket_list WHERE id = ?').run(req.params.id);
+    console.log('[AUDIT] admin_ticket_delete', {
+      ip: req.ip,
+      ticketId: req.params.id,
+      ts: new Date().toISOString(),
+    });
+    res.json({ ok: true });
+  }
+);
 
 // --- SLOTS ---
 
@@ -129,7 +144,10 @@ router.patch(
         }
         return true;
       }),
-    body('participant_id').optional({ nullable: true }).isUUID().withMessage('Invalid participant ID'),
+    body('participant_id')
+      .optional({ nullable: true })
+      .isUUID()
+      .withMessage('Invalid participant ID'),
   ],
   (req, res) => {
     const errors = validationResult(req);
@@ -143,7 +161,9 @@ router.patch(
     const { status, race_time, participant_id } = req.body;
 
     if (participant_id != null) {
-      const participantExists = db.prepare('SELECT id FROM participants WHERE id = ?').get(participant_id);
+      const participantExists = db
+        .prepare('SELECT id FROM participants WHERE id = ?')
+        .get(participant_id);
       if (!participantExists) return res.status(400).json({ error: 'Participant not found' });
     }
 
@@ -162,13 +182,21 @@ router.patch(
         updates.push('race_time');
       }
       if (participant_id !== undefined) {
-        db.prepare('UPDATE slots SET participant_id = ? WHERE id = ?').run(participant_id, req.params.id);
+        db.prepare('UPDATE slots SET participant_id = ? WHERE id = ?').run(
+          participant_id,
+          req.params.id
+        );
         updates.push('participant_id');
       }
     });
     applyUpdates();
 
-    console.log('[AUDIT] admin_slot_update', { ip: req.ip, slotId: req.params.id, fields: updates, ts: new Date().toISOString() });
+    console.log('[AUDIT] admin_slot_update', {
+      ip: req.ip,
+      slotId: req.params.id,
+      fields: updates,
+      ts: new Date().toISOString(),
+    });
     res.json({ ok: true });
   }
 );
@@ -180,10 +208,20 @@ router.patch(
   '/bracket',
   [
     body('entries').isArray({ min: 1 }).withMessage('entries must be a non-empty array'),
-    body('entries.*.participant_id').isUUID().withMessage('Each participant_id must be a valid UUID'),
-    body('entries.*.round').isIn(['semifinal', 'final']).withMessage('round must be semifinal or final'),
-    body('entries.*.group_number').optional({ nullable: true }).isInt({ min: 1 }).withMessage('group_number must be a positive integer'),
-    body('entries.*.position').optional({ nullable: true }).isInt({ min: 1, max: 4 }).withMessage('position must be between 1 and 4'),
+    body('entries.*.participant_id')
+      .isUUID()
+      .withMessage('Each participant_id must be a valid UUID'),
+    body('entries.*.round')
+      .isIn(['semifinal', 'final'])
+      .withMessage('round must be semifinal or final'),
+    body('entries.*.group_number')
+      .optional({ nullable: true })
+      .isInt({ min: 1 })
+      .withMessage('group_number must be a positive integer'),
+    body('entries.*.position')
+      .optional({ nullable: true })
+      .isInt({ min: 1, max: 4 })
+      .withMessage('position must be between 1 and 4'),
   ],
   (req, res) => {
     const errors = validationResult(req);
@@ -204,15 +242,15 @@ router.patch(
     const upsert = db.transaction((rows) => {
       for (const row of rows) {
         const existing = db
-          .prepare(
-            'SELECT id FROM bracket_entries WHERE participant_id = ? AND round = ?'
-          )
+          .prepare('SELECT id FROM bracket_entries WHERE participant_id = ? AND round = ?')
           .get(row.participant_id, row.round);
 
         if (existing) {
-          db.prepare(
-            'UPDATE bracket_entries SET group_number = ?, position = ? WHERE id = ?'
-          ).run(row.group_number ?? null, row.position ?? null, existing.id);
+          db.prepare('UPDATE bracket_entries SET group_number = ?, position = ? WHERE id = ?').run(
+            row.group_number ?? null,
+            row.position ?? null,
+            existing.id
+          );
         } else {
           db.prepare(
             'INSERT INTO bracket_entries (id, round, group_number, participant_id, position) VALUES (?, ?, ?, ?, ?)'
@@ -228,14 +266,22 @@ router.patch(
     });
 
     upsert(entries);
-    console.log('[AUDIT] admin_bracket_update', { ip: req.ip, count: entries.length, ts: new Date().toISOString() });
+    console.log('[AUDIT] admin_bracket_update', {
+      ip: req.ip,
+      count: entries.length,
+      ts: new Date().toISOString(),
+    });
     res.json({ ok: true });
   }
 );
 
 // GET /api/admin/participants
 router.get('/participants', (req, res) => {
-  console.log('[AUDIT] admin_participants_read', { ip: req.ip, adminId: req.user.sub, ts: new Date().toISOString() });
+  console.log('[AUDIT] admin_participants_read', {
+    ip: req.ip,
+    adminId: req.user.sub,
+    ts: new Date().toISOString(),
+  });
   const participants = db
     .prepare(
       `SELECT p.*, s.start_time AS slot_time, s.status AS slot_status, s.race_time, s.id AS slot_id
@@ -251,9 +297,7 @@ router.get('/participants', (req, res) => {
 
 // GET /api/admin/schedule
 router.get('/schedule', (req, res) => {
-  const rows = db
-    .prepare('SELECT * FROM schedule_events ORDER BY time_from ASC')
-    .all();
+  const rows = db.prepare('SELECT * FROM schedule_events ORDER BY time_from ASC').all();
   res.json(rows);
 });
 
@@ -261,8 +305,13 @@ router.get('/schedule', (req, res) => {
 router.post(
   '/schedule',
   [
-    body('time_from').matches(/^\d{2}:\d{2}$/).withMessage('time_from muss HH:MM sein'),
-    body('time_to').optional({ nullable: true }).matches(/^\d{2}:\d{2}$/).withMessage('time_to muss HH:MM sein'),
+    body('time_from')
+      .matches(/^\d{2}:\d{2}$/)
+      .withMessage('time_from muss HH:MM sein'),
+    body('time_to')
+      .optional({ nullable: true })
+      .matches(/^\d{2}:\d{2}$/)
+      .withMessage('time_to muss HH:MM sein'),
     body('event').trim().notEmpty().withMessage('event darf nicht leer sein'),
   ],
   (req, res) => {
@@ -275,8 +324,9 @@ router.post(
     }
     const maxOrder = db.prepare('SELECT MAX(sort_order) as m FROM schedule_events').get().m ?? -1;
     const id = uuidv4();
-    db.prepare('INSERT INTO schedule_events (id, time_from, time_to, event, sort_order) VALUES (?, ?, ?, ?, ?)')
-      .run(id, time_from, time_to ?? null, event.trim(), maxOrder + 1);
+    db.prepare(
+      'INSERT INTO schedule_events (id, time_from, time_to, event, sort_order) VALUES (?, ?, ?, ?, ?)'
+    ).run(id, time_from, time_to ?? null, event.trim(), maxOrder + 1);
     res.status(201).json({ ok: true, id });
   }
 );
@@ -286,8 +336,14 @@ router.patch(
   '/schedule/:id',
   [
     param('id').isUUID(),
-    body('time_from').optional().matches(/^\d{2}:\d{2}$/).withMessage('time_from muss HH:MM sein'),
-    body('time_to').optional({ nullable: true }).matches(/^\d{2}:\d{2}$/).withMessage('time_to muss HH:MM sein'),
+    body('time_from')
+      .optional()
+      .matches(/^\d{2}:\d{2}$/)
+      .withMessage('time_from muss HH:MM sein'),
+    body('time_to')
+      .optional({ nullable: true })
+      .matches(/^\d{2}:\d{2}$/)
+      .withMessage('time_to muss HH:MM sein'),
     body('event').optional().trim().notEmpty().withMessage('event darf nicht leer sein'),
     body('sort_order').optional().isInt({ min: 0 }),
   ],
@@ -319,20 +375,16 @@ router.patch(
 );
 
 // DELETE /api/admin/schedule/:id
-router.delete(
-  '/schedule/:id',
-  [param('id').isUUID()],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+router.delete('/schedule/:id', [param('id').isUUID()], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-    const row = db.prepare('SELECT id FROM schedule_events WHERE id = ?').get(req.params.id);
-    if (!row) return res.status(404).json({ error: 'Eintrag nicht gefunden' });
+  const row = db.prepare('SELECT id FROM schedule_events WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Eintrag nicht gefunden' });
 
-    db.prepare('DELETE FROM schedule_events WHERE id = ?').run(req.params.id);
-    res.json({ ok: true });
-  }
-);
+  db.prepare('DELETE FROM schedule_events WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
 
 // --- SETUP ---
 
@@ -343,7 +395,9 @@ router.get('/setup/status', (req, res) => {
     .prepare("SELECT COUNT(*) as count FROM slots WHERE status IN ('booked', 'completed')")
     .get().count;
   const nickSlot = db.prepare('SELECT start_time FROM slots ORDER BY start_time ASC LIMIT 1').get();
-  const lastSlot = db.prepare('SELECT start_time FROM slots ORDER BY start_time DESC LIMIT 1').get();
+  const lastSlot = db
+    .prepare('SELECT start_time FROM slots ORDER BY start_time DESC LIMIT 1')
+    .get();
 
   res.json({
     slot_count: slotCount,
@@ -358,16 +412,33 @@ router.post('/setup/migrate', (req, res) => {
   try {
     const schema = fs.readFileSync(path.join(__dirname, '../db/schema.sql'), 'utf8');
     db.exec(schema);
-    try { db.prepare('ALTER TABLE schedule_events ADD COLUMN time_from TEXT NOT NULL DEFAULT ""').run(); } catch (_) {}
-    try { db.prepare('ALTER TABLE schedule_events ADD COLUMN time_to TEXT').run(); } catch (_) {}
     try {
-      const cols = db.prepare('PRAGMA table_info(schedule_events)').all().map(c => c.name);
+      db.prepare('ALTER TABLE schedule_events ADD COLUMN time_from TEXT NOT NULL DEFAULT ""').run();
+    } catch (_) {
+      /* column already exists */
+    }
+    try {
+      db.prepare('ALTER TABLE schedule_events ADD COLUMN time_to TEXT').run();
+    } catch (_) {
+      /* column already exists */
+    }
+    try {
+      const cols = db
+        .prepare('PRAGMA table_info(schedule_events)')
+        .all()
+        .map((c) => c.name);
       if (cols.includes('time')) {
         db.prepare('UPDATE schedule_events SET time_from = time WHERE time_from = ""').run();
         db.prepare('ALTER TABLE schedule_events DROP COLUMN time').run();
       }
-    } catch (_) {}
-    console.log('[AUDIT] admin_migrate', { ip: req.ip, adminId: req.user.sub, ts: new Date().toISOString() });
+    } catch (_) {
+      /* column may not exist yet */
+    }
+    console.log('[AUDIT] admin_migrate', {
+      ip: req.ip,
+      adminId: req.user.sub,
+      ts: new Date().toISOString(),
+    });
     res.json({ ok: true });
   } catch (err) {
     console.error('Migration error:', err);
@@ -459,8 +530,15 @@ router.post(
 
     const seeded = seedSlots();
     console.log('[AUDIT] admin_seed_slots', {
-      ip: req.ip, adminId: req.user.sub, date, start_time, end_time, slot_duration, count: seeded,
-      cleared: clear_existing, ts: new Date().toISOString(),
+      ip: req.ip,
+      adminId: req.user.sub,
+      date,
+      start_time,
+      end_time,
+      slot_duration,
+      count: seeded,
+      cleared: clear_existing,
+      ts: new Date().toISOString(),
     });
     res.json({ ok: true, seeded });
   }
@@ -477,7 +555,11 @@ router.delete('/setup/slots', (req, res) => {
     });
   }
   db.prepare('DELETE FROM slots').run();
-  console.log('[AUDIT] admin_clear_slots', { ip: req.ip, adminId: req.user.sub, ts: new Date().toISOString() });
+  console.log('[AUDIT] admin_clear_slots', {
+    ip: req.ip,
+    adminId: req.user.sub,
+    ts: new Date().toISOString(),
+  });
   res.json({ ok: true });
 });
 
@@ -486,19 +568,24 @@ router.delete(
   '/setup/database',
   [body('confirm').equals('RESET').withMessage('confirm must be exactly "RESET"')],
   (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-  const reset = db.transaction(() => {
-    db.prepare('DELETE FROM bracket_entries').run();
-    db.prepare('DELETE FROM slots').run();
-    db.prepare('DELETE FROM participants').run();
-    db.prepare('DELETE FROM ticket_list').run();
-    db.prepare('DELETE FROM schedule_events').run();
-  });
-  reset();
-  console.log('[AUDIT] admin_reset_database', { ip: req.ip, adminId: req.user.sub, ts: new Date().toISOString() });
-  res.json({ ok: true });
-});
+    const reset = db.transaction(() => {
+      db.prepare('DELETE FROM bracket_entries').run();
+      db.prepare('DELETE FROM slots').run();
+      db.prepare('DELETE FROM participants').run();
+      db.prepare('DELETE FROM ticket_list').run();
+      db.prepare('DELETE FROM schedule_events').run();
+    });
+    reset();
+    console.log('[AUDIT] admin_reset_database', {
+      ip: req.ip,
+      adminId: req.user.sub,
+      ts: new Date().toISOString(),
+    });
+    res.json({ ok: true });
+  }
+);
 
 module.exports = router;

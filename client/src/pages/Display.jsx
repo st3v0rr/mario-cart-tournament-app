@@ -153,7 +153,7 @@ function BracketColumn({ title, entries, isFinal = false }) {
         {entries.length === 0 ? (
           <div className="bracket-empty">–</div>
         ) : (
-          entries.map((e, i) => {
+          entries.map((e, _i) => {
             const isWinner = isFinal && e.position === 1;
             const advancesToFinal = !isFinal && e.position != null && e.position <= 2;
             return (

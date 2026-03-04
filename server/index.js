@@ -27,15 +27,28 @@ _db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
 _db.exec(schema);
 // Migrations for existing databases
-try { _db.prepare('ALTER TABLE schedule_events ADD COLUMN time_from TEXT NOT NULL DEFAULT ""').run(); } catch (_) {}
-try { _db.prepare('ALTER TABLE schedule_events ADD COLUMN time_to TEXT').run(); } catch (_) {}
 try {
-  const cols = _db.prepare('PRAGMA table_info(schedule_events)').all().map(c => c.name);
+  _db.prepare('ALTER TABLE schedule_events ADD COLUMN time_from TEXT NOT NULL DEFAULT ""').run();
+} catch (_) {
+  /* column already exists */
+}
+try {
+  _db.prepare('ALTER TABLE schedule_events ADD COLUMN time_to TEXT').run();
+} catch (_) {
+  /* column already exists */
+}
+try {
+  const cols = _db
+    .prepare('PRAGMA table_info(schedule_events)')
+    .all()
+    .map((c) => c.name);
   if (cols.includes('time')) {
     _db.prepare('UPDATE schedule_events SET time_from = time WHERE time_from = ""').run();
     _db.prepare('ALTER TABLE schedule_events DROP COLUMN time').run();
   }
-} catch (_) {}
+} catch (_) {
+  /* column may not exist yet */
+}
 _db.close();
 
 const app = express();

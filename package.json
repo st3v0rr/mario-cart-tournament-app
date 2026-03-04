@@ -11,7 +11,13 @@
     "db:migrate": "node server/db/migrate.js",
     "db:seed": "node server/db/seed.js",
     "build": "cd client && npm run build",
-    "test": "echo \"No tests configured\" && exit 0"
+    "test": "echo \"No tests configured\" && exit 0",
+    "lint": "eslint server/",
+    "lint:fix": "eslint server/ --fix",
+    "lint:client": "cd client && npm run lint",
+    "lint:all": "npm run lint && npm run lint:client",
+    "format": "prettier --write \"server/**/*.js\"",
+    "format:check": "prettier --check \"server/**/*.js\""
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -27,7 +33,12 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.3",
     "concurrently": "^8.2.2",
-    "nodemon": "^3.0.3"
+    "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.4.0",
+    "nodemon": "^3.0.3",
+    "prettier": "^3.8.1"
   }
 }

@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
-import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { getLocale, formatTimeOrDash } from '../utils/locale';
 
 export default function Dashboard() {
-  const { auth } = useAuth();
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
