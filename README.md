@@ -11,7 +11,7 @@ A full-stack web application for running Mario Kart tournaments at conferences a
 - **Schedule** — event timetable displayed to all attendees
 - **Display view** — a presenter-friendly page showing leaderboard and schedule
 - **Admin panel** — full management of tickets, slots, race results, bracket entries, and schedule events
-- **CSV import** — bulk import of ticket holders from a CSV file
+- **Self-registration** — participants can register themselves with a nickname
 - **Audit logging** — all sensitive admin actions are logged to the console
 
 ## Tech Stack
@@ -80,7 +80,6 @@ Log in to the admin panel at `/admin/login`, then go to **Setup** to:
 
 1. Run the database migration
 2. Generate time slots by specifying a date, start time, end time, and slot duration
-3. Import ticket holders via CSV
 
 ## Scripts
 
