@@ -22,7 +22,7 @@ router.get('/tickets', (req, res) => {
        FROM ticket_list tl
        LEFT JOIN participants p ON p.ticket_list_id = tl.id
        LEFT JOIN slots s ON s.participant_id = p.id AND s.status = 'completed' AND s.race_time IS NOT NULL
-       ORDER BY tl.first_name ASC`
+       ORDER BY tl.nick_name ASC`
     )
     .all();
   res.json(tickets);
@@ -32,7 +32,7 @@ router.get('/tickets', (req, res) => {
 router.post(
   '/tickets',
   [
-    body('first_name').trim().notEmpty().isLength({ max: 100 }).withMessage('First name is required and must not exceed 100 characters'),
+    body('nick_name').trim().notEmpty().isLength({ max: 100 }).withMessage('Nick name is required and must not exceed 100 characters'),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -44,7 +44,7 @@ router.post(
       return res.status(400).json({ error: errors.array()[0].msg });
     }
 
-    const { first_name, ticket_number } = req.body;
+    const { nick_name, ticket_number } = req.body;
 
     const existing = db
       .prepare('SELECT id FROM ticket_list WHERE ticket_number = ?')
@@ -55,8 +55,8 @@ router.post(
 
     const id = uuidv4();
     db.prepare(
-      'INSERT INTO ticket_list (id, first_name, ticket_number, is_walk_up, claimed) VALUES (?, ?, ?, 1, 0)'
-    ).run(id, first_name, ticket_number);
+      'INSERT INTO ticket_list (id, nick_name, ticket_number, is_walk_up, claimed) VALUES (?, ?, ?, 1, 0)'
+    ).run(id, nick_name, ticket_number);
 
     res.status(201).json({ ok: true, id });
   }
@@ -73,14 +73,14 @@ router.post('/tickets/import', (req, res) => {
   }
 
   const insert = db.prepare(
-    'INSERT OR IGNORE INTO ticket_list (id, first_name, ticket_number, is_walk_up, claimed) VALUES (?, ?, ?, 0, 0)'
+    'INSERT OR IGNORE INTO ticket_list (id, nick_name, ticket_number, is_walk_up, claimed) VALUES (?, ?, ?, 0, 0)'
   );
 
   const insertMany = db.transaction((rows) => {
     let count = 0;
     for (const row of rows) {
-      if (!row.first_name || typeof row.first_name !== 'string' || row.first_name.length > 100 || !/^\d{5}$/.test(row.ticket_number)) continue;
-      const info = insert.run(uuidv4(), row.first_name.trim(), row.ticket_number.trim());
+      if (!row.nick_name || typeof row.nick_name !== 'string' || row.nick_name.length > 100 || !/^\d{5}$/.test(row.ticket_number)) continue;
+      const info = insert.run(uuidv4(), row.nick_name.trim(), row.ticket_number.trim());
       count += info.changes;
     }
     return count;
@@ -125,7 +125,7 @@ router.delete(
 router.get('/slots', (req, res) => {
   const slots = db
     .prepare(
-      `SELECT s.*, p.first_name AS participant_name
+      `SELECT s.*, p.nick_name AS participant_name
        FROM slots s
        LEFT JOIN participants p ON s.participant_id = p.id
        ORDER BY s.start_time ASC`
@@ -268,7 +268,7 @@ router.get('/participants', (req, res) => {
       `SELECT p.*, s.start_time AS slot_time, s.status AS slot_status, s.race_time, s.id AS slot_id
        FROM participants p
        LEFT JOIN slots s ON s.participant_id = p.id
-       ORDER BY p.first_name ASC`
+       ORDER BY p.nick_name ASC`
     )
     .all();
   res.json(participants);
@@ -369,13 +369,13 @@ router.get('/setup/status', (req, res) => {
   const bookedCount = db
     .prepare("SELECT COUNT(*) as count FROM slots WHERE status IN ('booked', 'completed')")
     .get().count;
-  const firstSlot = db.prepare('SELECT start_time FROM slots ORDER BY start_time ASC LIMIT 1').get();
+  const nickSlot = db.prepare('SELECT start_time FROM slots ORDER BY start_time ASC LIMIT 1').get();
   const lastSlot = db.prepare('SELECT start_time FROM slots ORDER BY start_time DESC LIMIT 1').get();
 
   res.json({
     slot_count: slotCount,
     booked_count: bookedCount,
-    first_slot: firstSlot?.start_time ?? null,
+    nick_slot: nickSlot?.start_time ?? null,
     last_slot: lastSlot?.start_time ?? null,
   });
 });

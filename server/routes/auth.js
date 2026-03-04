@@ -40,7 +40,7 @@ router.post(
   '/login',
   authLimiter,
   [
-    body('first_name').trim().notEmpty().isLength({ max: 100 }).withMessage('First name is required and must not exceed 100 characters'),
+    body('nick_name').trim().notEmpty().isLength({ max: 100 }).withMessage('Nick name is required and must not exceed 100 characters'),
     body('ticket_number')
       .trim()
       .matches(/^\d{5}$/)
@@ -52,13 +52,13 @@ router.post(
       return res.status(400).json({ error: errors.array()[0].msg });
     }
 
-    const { first_name, ticket_number } = req.body;
+    const { nick_name, ticket_number } = req.body;
 
     const entry = db
       .prepare(
-        'SELECT * FROM ticket_list WHERE ticket_number = ? AND LOWER(first_name) = LOWER(?)'
+        'SELECT * FROM ticket_list WHERE ticket_number = ? AND LOWER(nick_name) = LOWER(?)'
       )
-      .get(ticket_number, first_name);
+      .get(ticket_number, nick_name);
 
     if (!entry) {
       console.log('[AUDIT] participant_login_failed', { ip: req.ip, ts: new Date().toISOString() });
@@ -76,19 +76,19 @@ router.post(
     if (!participant) {
       const newId = uuidv4();
       db.prepare(
-        'INSERT INTO participants (id, ticket_list_id, first_name, ticket_number) VALUES (?, ?, ?, ?)'
-      ).run(newId, entry.id, entry.first_name, entry.ticket_number);
+        'INSERT INTO participants (id, ticket_list_id, nick_name, ticket_number) VALUES (?, ?, ?, ?)'
+      ).run(newId, entry.id, entry.nick_name, entry.ticket_number);
       participant = db.prepare('SELECT * FROM participants WHERE id = ?').get(newId);
     }
 
     const token = jwt.sign(
-      { sub: participant.id, role: 'participant', name: participant.first_name },
+      { sub: participant.id, role: 'participant', name: participant.nick_name },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
     res.cookie('token', token, cookieOpts);
-    res.json({ ok: true, name: participant.first_name, role: 'participant' });
+    res.json({ ok: true, name: participant.nick_name, role: 'participant' });
   }
 );
 

@@ -178,7 +178,7 @@ function SetupTab() {
             </div>
             <div className="stat-card">
               <span className="stat-label">Erster Slot</span>
-              <span className="stat-value" style={{ fontSize: '1rem' }}>{formatDt(status.first_slot)}</span>
+              <span className="stat-value" style={{ fontSize: '1rem' }}>{formatDt(status.nick_slot)}</span>
             </div>
             <div className="stat-card">
               <span className="stat-label">Letzter Slot</span>
@@ -454,7 +454,7 @@ function ScheduleEventsEditor() {
 // --- Tickets ---
 function TicketsTab() {
   const [tickets, setTickets] = useState([]);
-  const [firstName, setFirstName] = useState('');
+  const [nickName, setNickName] = useState('');
   const [ticketNumber, setTicketNumber] = useState('');
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
@@ -468,9 +468,9 @@ function TicketsTab() {
     e.preventDefault();
     setError(''); setMsg('');
     try {
-      await api.adminAddTicket(firstName, ticketNumber);
+      await api.adminAddTicket(nickName, ticketNumber);
       setMsg('Eintrag hinzugefügt!');
-      setFirstName(''); setTicketNumber('');
+      setNickName(''); setTicketNumber('');
       load();
     } catch (err) {
       setError(err.message);
@@ -493,7 +493,7 @@ function TicketsTab() {
         <div className="card" style={{ maxWidth: 400 }}>
           <h2>Walk-up eintragen</h2>
           <form onSubmit={addTicket} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-            <input className="input" placeholder="Vorname" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+            <input className="input" placeholder="Nickname" value={nickName} onChange={(e) => setNickName(e.target.value)} required />
             <input className="input" placeholder="Ticket-Nr. (5 Ziffern)" value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value.replace(/\D/g, '').slice(0, 5))}
               pattern="\d{5}" required />
@@ -508,7 +508,7 @@ function TicketsTab() {
         <table>
           <thead>
             <tr>
-              <th>Vorname</th>
+              <th>Nickname</th>
               <th>Ticket-Nr.</th>
               <th>Walk-up</th>
               <th>Claimed</th>
@@ -518,7 +518,7 @@ function TicketsTab() {
           <tbody>
             {tickets.map((t) => (
               <tr key={t.id}>
-                <td>{t.first_name}</td>
+                <td>{t.nick_name}</td>
                 <td style={{ fontFamily: 'monospace' }}>{t.ticket_number}</td>
                 <td>{t.is_walk_up ? '✓' : '—'}</td>
                 <td>{t.claimed ? <span className="badge badge-success">Ja</span> : <span className="badge badge-muted">Nein</span>}</td>
@@ -547,7 +547,7 @@ function CsvImportTab() {
     const lines = csvText.trim().split('\n').filter(Boolean);
     const entries = lines.map((line) => {
       const [fn, tn] = line.split(',').map((s) => s.trim());
-      return { first_name: fn, ticket_number: tn };
+      return { nick_name: fn, ticket_number: tn };
     });
     try {
       const res = await api.adminImportTickets(entries);
@@ -563,7 +563,7 @@ function CsvImportTab() {
       <div className="card" style={{ maxWidth: 500 }}>
         <h2>CSV Import</h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-sm)' }}>
-          Format: Vorname,Ticketnummer (eine Zeile pro Eintrag)
+          Format: Nickname,Ticketnummer (eine Zeile pro Eintrag)
         </p>
         <textarea
           className="input"
@@ -776,7 +776,7 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
         const entry = groupEntries.find((e) => e.participant_id === p.id);
         return (
           <div key={p.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span style={{ flex: 1 }}>{p.first_name}</span>
+            <span style={{ flex: 1 }}>{p.nick_name}</span>
             <input type="number" min={1} max={4} placeholder="Platz"
               value={entry?.position || ''}
               onChange={(e) => onPosition(p.id, round, e.target.value)}
@@ -797,7 +797,7 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
             const rank = top8.findIndex((t) => t.id === p.id);
             return (
               <option key={p.id} value={p.id}>
-                {rank >= 0 ? `#${rank + 1} ` : ''}{p.first_name}{p.race_time ? ` – ${p.race_time}` : ''}
+                {rank >= 0 ? `#${rank + 1} ` : ''}{p.nick_name}{p.race_time ? ` – ${p.race_time}` : ''}
               </option>
             );
           })}
@@ -833,7 +833,7 @@ function ParticipantsTab() {
           <tbody>
             {participants.map((p) => (
               <tr key={p.id}>
-                <td>{p.first_name}</td>
+                <td>{p.nick_name}</td>
                 <td style={{ fontFamily: 'monospace' }}>{p.ticket_number}</td>
                 <td>{formatTime(p.slot_time)}</td>
                 <td>

@@ -81,7 +81,7 @@ function BracketColumn({ title, entries, isFinal = false }) {
               >
                 {isWinner && <span className="bracket-crown">👑</span>}
                 <span className="bracket-entry-pos">{e.position ? `${e.position}.` : ''}</span>
-                <span className="bracket-entry-name">{e.first_name}</span>
+                <span className="bracket-entry-name">{e.nick_name}</span>
               </div>
             );
           })

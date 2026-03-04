@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS ticket_list (
   id TEXT PRIMARY KEY,
-  first_name TEXT NOT NULL,
+  nick_name TEXT NOT NULL,
   ticket_number TEXT NOT NULL UNIQUE,
   is_walk_up INTEGER NOT NULL DEFAULT 0,
   claimed INTEGER NOT NULL DEFAULT 0
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS ticket_list (
 CREATE TABLE IF NOT EXISTS participants (
   id TEXT PRIMARY KEY,
   ticket_list_id TEXT NOT NULL REFERENCES ticket_list(id),
-  first_name TEXT NOT NULL,
+  nick_name TEXT NOT NULL,
   ticket_number TEXT NOT NULL
 );
 

@@ -4,7 +4,7 @@ A full-stack web application for running Mario Kart tournaments at conferences a
 
 ## Features
 
-- **Ticket-based login** — participants authenticate with their first name and a 5-digit ticket number
+- **Ticket-based login** — participants authenticate with their nick name and a 5-digit ticket number
 - **Slot booking** — view available time slots and book or cancel your own race slot (cancellation requires > 10 minutes notice)
 - **Leaderboard** — live ranking of completed race times
 - **Tournament bracket** — semifinal and final bracket managed by the admin
@@ -74,7 +74,7 @@ npm run dev
 
 This starts the Express server (port 3000) and the Vite dev server (port 5173) concurrently.
 
-### 4. Set up time slots (first run)
+### 4. Set up time slots (nick run)
 
 Log in to the admin panel at `/admin/login`, then go to **Setup** to:
 

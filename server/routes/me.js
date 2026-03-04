@@ -46,7 +46,7 @@ router.get('/', requireAuth, (req, res) => {
     .all(participantId);
 
   res.json({
-    first_name: participant.first_name,
+    nick_name: participant.nick_name,
     ticket_number: participant.ticket_number,
     slot: slot || null,
     rank,

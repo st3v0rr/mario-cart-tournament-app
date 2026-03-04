@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
   const slots = db
     .prepare(
       `SELECT s.id, s.start_time, s.status, s.race_time,
-              p.first_name AS participant_name, p.id AS participant_id
+              p.nick_name AS participant_name, p.id AS participant_id
        FROM slots s
        LEFT JOIN participants p ON s.participant_id = p.id
        ORDER BY s.start_time ASC`

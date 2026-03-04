@@ -14,8 +14,8 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async (firstName, ticketNumber) => {
-    const data = await api.login(firstName, ticketNumber);
+  const login = async (nickName, ticketNumber) => {
+    const data = await api.login(nickName, ticketNumber);
     setAuth({ authenticated: true, role: 'participant', name: data.name });
     return data;
   };

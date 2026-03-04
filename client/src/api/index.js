@@ -24,8 +24,8 @@ async function request(method, path, body) {
 
 export const api = {
   // Auth
-  login: (first_name, ticket_number) =>
-    request('POST', '/auth/login', { first_name, ticket_number }),
+  login: (nick_name, ticket_number) =>
+    request('POST', '/auth/login', { nick_name, ticket_number }),
   adminLogin: (username, password) =>
     request('POST', '/auth/admin/login', { username, password }),
   logout: () => request('POST', '/auth/logout'),
@@ -49,8 +49,8 @@ export const api = {
 
   // Admin
   adminGetTickets: () => request('GET', '/admin/tickets'),
-  adminAddTicket: (first_name, ticket_number) =>
-    request('POST', '/admin/tickets', { first_name, ticket_number }),
+  adminAddTicket: (nick_name, ticket_number) =>
+    request('POST', '/admin/tickets', { nick_name, ticket_number }),
   adminImportTickets: (entries) =>
     request('POST', '/admin/tickets/import', { entries }),
   adminDeleteTicket: (id) => request('DELETE', `/admin/tickets/${id}`),

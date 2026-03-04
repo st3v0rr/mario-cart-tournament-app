@@ -91,7 +91,7 @@ function DisplayLeaderboard({ rows }) {
               )}
               <div key={i} className={`display-lb-row${i >= 8 ? ' display-lb-row--reserve' : ''}`}>
                 <span className="display-lb-rank">#{i + 1}</span>
-                <span className="display-lb-name">{row.first_name}</span>
+                <span className="display-lb-name">{row.nick_name}</span>
                 <span className="display-lb-time">{row.race_time}</span>
               </div>
             </>
@@ -153,7 +153,7 @@ function BracketColumn({ title, entries, isFinal = false }) {
               >
                 {isWinner && <span className="bracket-crown">👑</span>}
                 <span className="bracket-entry-pos">{e.position ? `${e.position}.` : ''}</span>
-                <span className="bracket-entry-name">{e.first_name}</span>
+                <span className="bracket-entry-name">{e.nick_name}</span>
               </div>
             );
           })

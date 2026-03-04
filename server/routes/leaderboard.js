@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   const rows = db
     .prepare(
-      `SELECT p.first_name, s.race_time, s.start_time
+      `SELECT p.nick_name, s.race_time, s.start_time
        FROM slots s
        JOIN participants p ON s.participant_id = p.id
        WHERE s.status = 'completed' AND s.race_time IS NOT NULL

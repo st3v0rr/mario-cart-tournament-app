@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
   const entries = db
     .prepare(
       `SELECT be.id, be.round, be.group_number, be.position,
-              p.first_name, p.id AS participant_id
+              p.nick_name, p.id AS participant_id
        FROM bracket_entries be
        JOIN participants p ON be.participant_id = p.id
        ORDER BY be.round ASC, be.group_number ASC, be.position ASC`

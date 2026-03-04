@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className="page">
-      <h1>Hallo, {data.first_name}! 👋</h1>
+      <h1>Hallo, {data.nick_name}! 👋</h1>
 
       <div className="card">
         <h2>Mein Time Trial Slot</h2>

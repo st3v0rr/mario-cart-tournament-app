@@ -7,7 +7,7 @@ import './Login.css';
 export default function Login() {
   const { auth, login } = useAuth();
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState('');
+  const [nickName, setNickName] = useState('');
   const [ticketNumber, setTicketNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      await login(firstName, ticketNumber);
+      await login(nickName, ticketNumber);
       navigate('/dashboard', { replace: true });
     } catch (err) {
       if (err.retryAfter) {
@@ -50,14 +50,14 @@ export default function Login() {
         <p className="login-subtitle">Melde dich mit deinem Namen und Ticket-Code an</p>
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="firstName">Vorname</label>
+            <label htmlFor="nickName">Nickname</label>
             <input
-              id="firstName"
+              id="nickName"
               className="input"
               type="text"
-              placeholder="Dein Vorname"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Dein Nickname"
+              value={nickName}
+              onChange={(e) => setNickName(e.target.value)}
               required
               autoComplete="given-name"
             />

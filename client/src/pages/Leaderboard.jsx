@@ -43,7 +43,7 @@ export default function Leaderboard() {
             {rows.map((row, i) => (
               <div key={i} className="display-lb-row">
                 <span className="display-lb-rank">#{i + 1}</span>
-                <span className="display-lb-name">{row.first_name}</span>
+                <span className="display-lb-name">{row.nick_name}</span>
                 <span className="display-lb-time">{row.race_time}</span>
               </div>
             ))}
