@@ -1,20 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { useTranslation } from 'react-i18next';
 const logoSrc = '/logo.png';
 import './Display.css';
 import './Leaderboard.css';
 
 export default function Leaderboard() {
   const [rows, setRows] = useState([]);
-  const [lastUpdate, setLastUpdate] = useState(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const load = useCallback(async () => {
     try {
       const data = await api.getAllLeaderboard();
       setRows(data);
-      setLastUpdate(new Date());
     } catch {
       // keep previous data
     }
@@ -29,15 +29,15 @@ export default function Leaderboard() {
   return (
     <div className="lb-mobile">
       <div className="display-header">
-        <button className="lb-back-btn" onClick={() => navigate(-1)} title="Zurück">←</button>
+        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>←</button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="lb-header-logo" />
         <button className="btn btn-secondary btn-sm" onClick={load}>↻</button>
       </div>
 
       <div className="lb-mobile-content">
-        <h2 className="lb-mobile-title">🏆 Zeitfahren – Rangliste</h2>
+        <h2 className="lb-mobile-title">{t('leaderboard.title')}</h2>
         {rows.length === 0 ? (
-          <p className="display-empty" style={{ fontSize: '1rem', padding: '24px' }}>Noch keine Ergebnisse</p>
+          <p className="display-empty" style={{ fontSize: '1rem', padding: '24px' }}>{t('leaderboard.empty')}</p>
         ) : (
           <div className="display-leaderboard">
             {rows.map((row, i) => (

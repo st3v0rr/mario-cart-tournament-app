@@ -1,20 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { useTranslation } from 'react-i18next';
 const logoSrc = '/logo.png';
 import './Display.css';
 import './Leaderboard.css';
 
 export default function Bracket() {
   const [entries, setEntries] = useState([]);
-  const [lastUpdate, setLastUpdate] = useState(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const load = useCallback(async () => {
     try {
       const data = await api.getBracket();
       setEntries(data);
-      setLastUpdate(new Date());
     } catch {
       // keep previous data
     }
@@ -35,26 +35,26 @@ export default function Bracket() {
   return (
     <div className="lb-mobile">
       <div className="display-header">
-        <button className="lb-back-btn" onClick={() => navigate(-1)} title="Zurück">←</button>
+        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>←</button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="lb-header-logo" />
         <button className="btn btn-secondary btn-sm" onClick={load}>↻</button>
       </div>
 
       <div className="lb-mobile-content">
-        <h2 className="lb-mobile-title">🏁 Finals</h2>
+        <h2 className="lb-mobile-title">{t('bracket.title')}</h2>
         {entries.length === 0 ? (
           <p className="display-empty" style={{ fontSize: '1rem', padding: '24px' }}>
-            Bracket wird nach den Time Trials angezeigt
+            {t('bracket.empty')}
           </p>
         ) : (
           <div className="bracket-tree">
             <div className="bracket-semis">
-              <BracketColumn title="Halbfinale 1" entries={g1} />
-              <BracketColumn title="Halbfinale 2" entries={g2} />
+              <BracketColumn title={t('bracket.semifinal1')} entries={g1} />
+              <BracketColumn title={t('bracket.semifinal2')} entries={g2} />
             </div>
             <div className="bracket-final-row">
               <div className="bracket-down-arrow">↓</div>
-              <BracketColumn title="🏆 Finale" entries={finalSorted} isFinal />
+              <BracketColumn title={t('bracket.final')} entries={finalSorted} isFinal />
             </div>
           </div>
         )}

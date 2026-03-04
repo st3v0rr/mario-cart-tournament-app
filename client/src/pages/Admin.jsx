@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
+import { useTranslation } from 'react-i18next';
+import { getLocale, formatTime, formatTimeOrDash, formatDateTimeOrDash } from '../utils/locale';
 import './Admin.css';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -35,37 +37,38 @@ function TimeSelect({ value, onChange, required, style }) {
   );
 }
 
-const TABS = ['Tickets', 'Slots', 'Teilnehmer', 'Bracket'];
+const TAB_IDS = ['tickets', 'slots', 'participants', 'bracket'];
 
 export default function Admin() {
-  const [tab, setTab] = useState('Tickets');
+  const [tab, setTab] = useState('tickets');
+  const { t } = useTranslation();
 
   return (
     <div className="page-wide">
-      <h1>⚙️ Admin-Panel</h1>
+      <h1>{t('admin.title')}</h1>
       <div className="admin-tabs">
-        {TABS.map((t) => (
+        {TAB_IDS.map((id) => (
           <button
-            key={t}
-            className={`admin-tab btn ${tab === t ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setTab(t)}
+            key={id}
+            className={`admin-tab btn ${tab === id ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setTab(id)}
           >
-            {t}
+            {t(`admin.tab.${id}`)}
           </button>
         ))}
         <button
-          className={`admin-tab admin-tab-setup btn ${tab === 'Setup' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setTab('Setup')}
+          className={`admin-tab admin-tab-setup btn ${tab === 'setup' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setTab('setup')}
         >
-          ⚙ Setup
+          {t('admin.tab.setup')}
         </button>
       </div>
       <div className="admin-content">
-        {tab === 'Setup' && <SetupTab />}
-        {tab === 'Tickets' && <TicketsTab />}
-        {tab === 'Slots' && <SlotsTab />}
-        {tab === 'Bracket' && <BracketTab />}
-        {tab === 'Teilnehmer' && <ParticipantsTab />}
+        {tab === 'setup' && <SetupTab />}
+        {tab === 'tickets' && <TicketsTab />}
+        {tab === 'slots' && <SlotsTab />}
+        {tab === 'bracket' && <BracketTab />}
+        {tab === 'participants' && <ParticipantsTab />}
       </div>
     </div>
   );
@@ -73,6 +76,7 @@ export default function Admin() {
 
 // --- Setup ---
 function SetupTab() {
+  const { t, i18n } = useTranslation();
   const today = new Date().toISOString().slice(0, 10);
   const [status, setStatus] = useState(null);
   const [statusError, setStatusError] = useState('');
@@ -104,7 +108,7 @@ function SetupTab() {
     setMigrateMsg(''); setMigrateError('');
     try {
       await api.adminMigrate();
-      setMigrateMsg('Datenbank erfolgreich initialisiert.');
+      setMigrateMsg(t('admin.setup.dbInitialized'));
     } catch (e) {
       setMigrateError(e.message);
     }
@@ -114,7 +118,7 @@ function SetupTab() {
     setResetMsg(''); setResetError('');
     try {
       await api.adminResetDatabase();
-      setResetMsg('Datenbank vollständig zurückgesetzt.');
+      setResetMsg(t('admin.danger.resetSuccess'));
       setResetConfirm('');
       loadStatus();
     } catch (e) {
@@ -133,7 +137,7 @@ function SetupTab() {
         slot_duration: Number(slotDuration),
         clear_existing: clearExisting,
       });
-      setSeedMsg(`${res.seeded} Slots erfolgreich erstellt.`);
+      setSeedMsg(t('admin.setup.seedSuccess', { count: res.seeded }));
       setClearExisting(false);
       loadStatus();
     } catch (e) {
@@ -151,61 +155,57 @@ function SetupTab() {
       )
     : null;
 
-  const formatDt = (iso) => {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleString('de-DE', {
-      dateStyle: 'short', timeStyle: 'short',
-    });
-  };
+  const locale = getLocale(i18n.language);
+  const formatDt = (iso) => formatDateTimeOrDash(iso, locale);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
 
       {/* DB Status */}
       <div className="card">
-        <h2>Datenbank-Status</h2>
+        <h2>{t('admin.setup.dbStatus')}</h2>
         {statusError && <p className="error-msg">{statusError}</p>}
         {status && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-sm)' }}>
             <div className="stat-card">
-              <span className="stat-label">Slots gesamt</span>
+              <span className="stat-label">{t('admin.setup.slotsTotal')}</span>
               <span className="stat-value">{status.slot_count}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Gebucht/Abgeschlossen</span>
+              <span className="stat-label">{t('admin.setup.bookedCompleted')}</span>
               <span className="stat-value">{status.booked_count}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Erster Slot</span>
+              <span className="stat-label">{t('admin.setup.firstSlot')}</span>
               <span className="stat-value" style={{ fontSize: '1rem' }}>{formatDt(status.nick_slot)}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Letzter Slot</span>
+              <span className="stat-label">{t('admin.setup.lastSlot')}</span>
               <span className="stat-value" style={{ fontSize: '1rem' }}>{formatDt(status.last_slot)}</span>
             </div>
           </div>
         )}
         <button className="btn btn-secondary" style={{ marginTop: 'var(--spacing-md)' }} onClick={loadStatus}>
-          Aktualisieren
+          {t('admin.setup.refresh')}
         </button>
       </div>
 
       {/* Seed */}
       <div className="card">
-        <h2>Zeitplan konfigurieren</h2>
+        <h2>{t('admin.setup.configTitle')}</h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)' }}>
-          Entspricht <code>npm run db:seed</code>, mit konfigurierbarem Datum und Zeitraum.
+          {t('admin.setup.configHint')}
         </p>
 
         {status?.slot_count > 0 && !clearExisting && (
           <div className="error-msg" style={{ marginBottom: 'var(--spacing-md)' }}>
-            Es existieren bereits <strong>{status.slot_count}</strong> Slots. Aktiviere „Vorhandene Slots löschen", um sie zu ersetzen.
+            {t('admin.setup.slotsExist', { count: status.slot_count })}
           </div>
         )}
 
         <form onSubmit={runSeed} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', maxWidth: 440 }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Renntag</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.raceDay')}</span>
             <input
               type="date"
               className="input"
@@ -217,17 +217,17 @@ function SetupTab() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)' }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Startzeit</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.startTime')}</span>
               <TimeSelect value={startTime} onChange={setStartTime} required />
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Endzeit</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.endTime')}</span>
               <TimeSelect value={endTime} onChange={setEndTime} required />
             </label>
           </div>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Slot-Dauer (Minuten)</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.slotDuration')}</span>
             <select
               className="input"
               value={slotDuration}
@@ -241,7 +241,7 @@ function SetupTab() {
 
           {slotCount !== null && slotCount > 0 && (
             <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>
-              → <strong>{slotCount}</strong> Slots werden erstellt ({startTime}–{endTime}, je {slotDuration} min)
+              {t('admin.setup.slotsWillBeCreated', { count: slotCount, start: startTime, end: endTime, duration: slotDuration })}
             </p>
           )}
 
@@ -254,7 +254,7 @@ function SetupTab() {
                 disabled={status?.booked_count > 0}
               />
               <span style={{ fontSize: '0.9rem' }}>
-                Vorhandene Slots löschen (nur möglich wenn keine gebucht/abgeschlossen)
+                {t('admin.setup.clearExisting')}
               </span>
             </label>
           )}
@@ -267,7 +267,7 @@ function SetupTab() {
             className="btn btn-primary"
             disabled={seeding || (status?.slot_count > 0 && !clearExisting)}
           >
-            {seeding ? 'Wird erstellt…' : 'Slots erstellen'}
+            {seeding ? t('admin.setup.creating') : t('admin.setup.createSlots')}
           </button>
         </form>
 
@@ -277,19 +277,19 @@ function SetupTab() {
 
       {/* Danger Zone */}
       <div className="card setup-danger-zone">
-        <h2>Gefahrenzone</h2>
+        <h2>{t('admin.danger.title')}</h2>
 
         <div className="danger-zone-section">
           <div>
-            <strong>Datenbank initialisieren</strong>
+            <strong>{t('admin.danger.initTitle')}</strong>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '4px 0 0' }}>
-              Legt fehlende Tabellen an — bestehende Daten bleiben erhalten.
+              {t('admin.danger.initHint')}
             </p>
           </div>
           {migrateMsg && <p className="success-msg" style={{ margin: 0 }}>{migrateMsg}</p>}
           {migrateError && <p className="error-msg" style={{ margin: 0 }}>{migrateError}</p>}
           <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={runMigrate}>
-            Initialisieren
+            {t('admin.danger.init')}
           </button>
         </div>
 
@@ -297,9 +297,9 @@ function SetupTab() {
 
         <div className="danger-zone-section">
           <div>
-            <strong>Datenbank zurücksetzen</strong>
+            <strong>{t('admin.danger.resetTitle')}</strong>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '4px 0 0' }}>
-              Löscht <strong>alle</strong> Daten (Tickets, Teilnehmer, Slots, Bracket). Unwiderruflich.
+              {t('admin.danger.resetHint')}
             </p>
           </div>
           {resetMsg && <p className="success-msg" style={{ margin: 0 }}>{resetMsg}</p>}
@@ -308,7 +308,7 @@ function SetupTab() {
             <input
               className="input"
               style={{ maxWidth: 260 }}
-              placeholder='Zur Bestätigung "RESET" eingeben'
+              placeholder={t('admin.danger.resetConfirmPlaceholder')}
               value={resetConfirm}
               onChange={(e) => setResetConfirm(e.target.value)}
             />
@@ -317,7 +317,7 @@ function SetupTab() {
               disabled={resetConfirm !== 'RESET'}
               onClick={runReset}
             >
-              Zurücksetzen
+              {t('admin.danger.reset')}
             </button>
           </div>
         </div>
@@ -326,8 +326,9 @@ function SetupTab() {
   );
 }
 
-// --- Schedule Events Editor (Programmablauf) ---
+// --- Schedule Events Editor ---
 function ScheduleEventsEditor() {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
@@ -371,18 +372,16 @@ function ScheduleEventsEditor() {
     try {
       await api.adminAddScheduleEvent(newFrom, newEvent, newTo || null);
       setNewFrom(''); setNewTo(''); setNewEvent('');
-      setMsg('Eintrag hinzugefügt.');
+      setMsg(t('admin.schedule.added'));
       load();
     } catch (e) { setError(e.message); }
   };
 
-  const fmtRange = (ev) => ev.time_to ? `${ev.time_from}–${ev.time_to}` : ev.time_from;
-
   return (
     <div className="card">
-      <h2>Programmablauf</h2>
+      <h2>{t('admin.schedule.title')}</h2>
       <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)' }}>
-        Wird auf dem Display im Zeitplan angezeigt.
+        {t('admin.schedule.hint')}
       </p>
 
       {msg && <p className="success-msg">{msg}</p>}
@@ -390,11 +389,16 @@ function ScheduleEventsEditor() {
 
       <table style={{ marginBottom: 'var(--spacing-md)' }}>
         <thead>
-          <tr><th>Von</th><th>Bis</th><th>Programmpunkt</th><th style={{ textAlign: 'right' }}></th></tr>
+          <tr>
+            <th>{t('admin.schedule.from')}</th>
+            <th>{t('admin.schedule.to')}</th>
+            <th>{t('admin.schedule.event')}</th>
+            <th style={{ textAlign: 'right' }}></th>
+          </tr>
         </thead>
         <tbody>
           {events.length === 0 && (
-            <tr><td colSpan={4} style={{ color: 'var(--color-text-muted)', textAlign: 'center' }}>Keine Einträge</td></tr>
+            <tr><td colSpan={4} style={{ color: 'var(--color-text-muted)', textAlign: 'center' }}>{t('admin.schedule.noEntries')}</td></tr>
           )}
           {events.map((ev) => (
             <tr key={ev.id}>
@@ -433,18 +437,18 @@ function ScheduleEventsEditor() {
 
       <form onSubmit={add} style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Von</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('admin.schedule.from')}</span>
           <TimeSelect value={newFrom} onChange={setNewFrom} required style={{ width: 150 }} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Bis (optional)</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('admin.schedule.toOptional')}</span>
           <TimeSelect value={newTo} onChange={setNewTo} style={{ width: 150 }} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Programmpunkt</span>
-          <input className="input" placeholder="z.B. Semifinale" value={newEvent} onChange={(e) => setNewEvent(e.target.value)} required />
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('admin.schedule.event')}</span>
+          <input className="input" placeholder={t('admin.schedule.eventPlaceholder')} value={newEvent} onChange={(e) => setNewEvent(e.target.value)} required />
         </label>
-        <button type="submit" className="btn btn-primary">Hinzufügen</button>
+        <button type="submit" className="btn btn-primary">{t('admin.schedule.add')}</button>
       </form>
     </div>
   );
@@ -452,6 +456,7 @@ function ScheduleEventsEditor() {
 
 // --- Tickets ---
 function TicketsTab() {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);
   const [nickName, setNickName] = useState('');
   const [ticketNumber, setTicketNumber] = useState('');
@@ -468,7 +473,7 @@ function TicketsTab() {
     setError(''); setMsg('');
     try {
       await api.adminAddTicket(nickName, ticketNumber);
-      setMsg('Eintrag hinzugefügt!');
+      setMsg(t('admin.tickets.added'));
       setNickName(''); setTicketNumber('');
       load();
     } catch (err) {
@@ -477,7 +482,7 @@ function TicketsTab() {
   };
 
   const deleteTicket = async (id) => {
-    if (!confirm('Eintrag löschen?')) return;
+    if (!confirm(t('admin.tickets.deleteConfirm'))) return;
     try {
       await api.adminDeleteTicket(id);
       load();
@@ -490,13 +495,13 @@ function TicketsTab() {
     <div>
       <div style={{ marginBottom: 'var(--spacing-lg)' }}>
         <div className="card" style={{ maxWidth: 400 }}>
-          <h2>Walk-up eintragen</h2>
+          <h2>{t('admin.tickets.walkUpTitle')}</h2>
           <form onSubmit={addTicket} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-            <input className="input" placeholder="Nickname" value={nickName} onChange={(e) => setNickName(e.target.value)} required minLength={3} maxLength={30} />
-            <input className="input" placeholder="Ticket-Nr. (5 Ziffern)" value={ticketNumber}
+            <input className="input" placeholder={t('admin.tickets.nicknamePlaceholder')} value={nickName} onChange={(e) => setNickName(e.target.value)} required minLength={3} maxLength={30} />
+            <input className="input" placeholder={t('admin.tickets.ticketPlaceholder')} value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value.replace(/\D/g, '').slice(0, 5))}
               pattern="\d{5}" required />
-            <button type="submit" className="btn btn-primary">Hinzufügen</button>
+            <button type="submit" className="btn btn-primary">{t('admin.tickets.add')}</button>
           </form>
         </div>
       </div>
@@ -507,23 +512,23 @@ function TicketsTab() {
         <table>
           <thead>
             <tr>
-              <th>Nickname</th>
-              <th>Ticket-Nr.</th>
-              <th>Walk-up</th>
-              <th>Claimed</th>
+              <th>{t('admin.tickets.colNickname')}</th>
+              <th>{t('admin.tickets.colTicket')}</th>
+              <th>{t('admin.tickets.colWalkUp')}</th>
+              <th>{t('admin.tickets.colClaimed')}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {tickets.map((t) => (
-              <tr key={t.id}>
-                <td>{t.nick_name}</td>
-                <td style={{ fontFamily: 'monospace' }}>{t.ticket_number}</td>
-                <td>{t.is_walk_up ? '✓' : '—'}</td>
-                <td>{t.claimed ? <span className="badge badge-success">Ja</span> : <span className="badge badge-muted">Nein</span>}</td>
+            {tickets.map((t_) => (
+              <tr key={t_.id}>
+                <td>{t_.nick_name}</td>
+                <td style={{ fontFamily: 'monospace' }}>{t_.ticket_number}</td>
+                <td>{t_.is_walk_up ? '✓' : '—'}</td>
+                <td>{t_.claimed ? <span className="badge badge-success">{t('admin.tickets.yes')}</span> : <span className="badge badge-muted">{t('admin.tickets.no')}</span>}</td>
                 <td>
-                  {!t.race_time && (
-                    <button className="btn btn-danger btn-sm" onClick={() => deleteTicket(t.id)}>×</button>
+                  {!t_.race_time && (
+                    <button className="btn btn-danger btn-sm" onClick={() => deleteTicket(t_.id)}>×</button>
                   )}
                 </td>
               </tr>
@@ -537,6 +542,7 @@ function TicketsTab() {
 
 // --- Slots ---
 function SlotsTab() {
+  const { t, i18n } = useTranslation();
   const [slots, setSlots] = useState([]);
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
@@ -548,7 +554,8 @@ function SlotsTab() {
 
   useEffect(() => { load(); }, [load]);
 
-  const formatTime = (iso) => new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const locale = getLocale(i18n.language);
+  const fmt = (iso) => formatTime(iso, locale);
 
   const startEdit = (slot) => {
     setEditId(slot.id);
@@ -561,7 +568,7 @@ function SlotsTab() {
     if (editData.race_time) payload.race_time = editData.race_time;
     try {
       await api.adminUpdateSlot(id, payload);
-      setMsg('Slot gespeichert.');
+      setMsg(t('admin.slots.saved'));
       setEditId(null);
       load();
     } catch (err) {
@@ -577,17 +584,17 @@ function SlotsTab() {
         <table>
           <thead>
             <tr>
-              <th>Zeit</th>
-              <th>Status</th>
-              <th>Teilnehmer</th>
-              <th>Rennzeit</th>
+              <th>{t('admin.slots.colTime')}</th>
+              <th>{t('admin.slots.colStatus')}</th>
+              <th>{t('admin.slots.colParticipant')}</th>
+              <th>{t('admin.slots.colRaceTime')}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {slots.map((slot) => (
               <tr key={slot.id}>
-                <td style={{ fontWeight: 600 }}>{formatTime(slot.start_time)}</td>
+                <td style={{ fontWeight: 600 }}>{fmt(slot.start_time)}</td>
                 <td>
                   {editId === slot.id ? (
                     <select className="input" style={{ padding: '4px 8px' }} value={editData.status}
@@ -619,7 +626,7 @@ function SlotsTab() {
                       <button className="btn btn-secondary btn-sm" onClick={() => setEditId(null)}>✕</button>
                     </div>
                   ) : (
-                    <button className="btn btn-secondary btn-sm" onClick={() => startEdit(slot)}>Bearbeiten</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => startEdit(slot)}>{t('admin.slots.edit')}</button>
                   )}
                 </td>
               </tr>
@@ -633,6 +640,7 @@ function SlotsTab() {
 
 // --- Bracket ---
 function BracketTab() {
+  const { t } = useTranslation();
   const [participants, setParticipants] = useState([]);
   const [entries, setEntries] = useState([]);
   const [msg, setMsg] = useState('');
@@ -667,13 +675,12 @@ function BracketTab() {
     setError(''); setMsg('');
     try {
       await api.adminUpdateBracket(entries);
-      setMsg('Bracket gespeichert!');
+      setMsg(t('admin.bracket.saved'));
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Top 8 from leaderboard
   const top8 = participants
     .filter((p) => p.race_time)
     .sort((a, b) => a.race_time?.localeCompare(b.race_time))
@@ -685,27 +692,28 @@ function BracketTab() {
       {error && <p className="error-msg">{error}</p>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
         <div className="card">
-          <h2>Semifinale – Gruppe 1</h2>
+          <h2>{t('admin.bracket.semi1')}</h2>
           <BracketGroup round="semifinal" groupNumber={1} entries={entries} participants={participants}
             top8={top8} onAdd={addEntry} onRemove={removeEntry} onPosition={setPosition} />
         </div>
         <div className="card">
-          <h2>Semifinale – Gruppe 2</h2>
+          <h2>{t('admin.bracket.semi2')}</h2>
           <BracketGroup round="semifinal" groupNumber={2} entries={entries} participants={participants}
             top8={top8} onAdd={addEntry} onRemove={removeEntry} onPosition={setPosition} />
         </div>
       </div>
       <div className="card">
-        <h2>Finale</h2>
+        <h2>{t('admin.bracket.final')}</h2>
         <BracketGroup round="final" groupNumber={null} entries={entries} participants={participants}
           top8={top8} onAdd={addEntry} onRemove={removeEntry} onPosition={setPosition} />
       </div>
-      <button className="btn btn-primary" onClick={save}>Bracket speichern</button>
+      <button className="btn btn-primary" onClick={save}>{t('admin.bracket.save')}</button>
     </div>
   );
 }
 
 function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, onRemove, onPosition }) {
+  const { t } = useTranslation();
   const groupEntries = entries.filter(
     (e) => e.round === round && (groupNumber === null || e.group_number === groupNumber)
   );
@@ -729,7 +737,7 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
         return (
           <div key={p.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ flex: 1 }}>{p.nick_name}</span>
-            <input type="number" min={1} max={4} placeholder="Platz"
+            <input type="number" min={1} max={4} placeholder={t('admin.bracket.placePlaceholder')}
               value={entry?.position || ''}
               onChange={(e) => onPosition(p.id, round, e.target.value)}
               className="input" style={{ width: 70, padding: '4px 8px' }} />
@@ -739,14 +747,14 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
       })}
       {round === 'final' && semifinalFinalists.length === 0 ? (
         <select className="input" style={{ padding: '6px 8px' }} disabled>
-          <option>Erst Platzierungen im Halbfinale eintragen</option>
+          <option>{t('admin.bracket.semifinalFirst')}</option>
         </select>
       ) : available.length > 0 && (
         <select className="input" style={{ padding: '6px 8px' }}
           onChange={(e) => { if (e.target.value) { onAdd(e.target.value, round, groupNumber); e.target.value = ''; } }}>
-          <option value="">+ Spieler hinzufügen</option>
+          <option value="">{t('admin.bracket.addPlayer')}</option>
           {available.map((p) => {
-            const rank = top8.findIndex((t) => t.id === p.id);
+            const rank = top8.findIndex((t_) => t_.id === p.id);
             return (
               <option key={p.id} value={p.id}>
                 {rank >= 0 ? `#${rank + 1} ` : ''}{p.nick_name}{p.race_time ? ` – ${p.race_time}` : ''}
@@ -761,13 +769,15 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
 
 // --- Participants ---
 function ParticipantsTab() {
+  const { t, i18n } = useTranslation();
   const [participants, setParticipants] = useState([]);
 
   useEffect(() => {
     api.adminGetParticipants().then(setParticipants);
   }, []);
 
-  const formatTime = (iso) => iso ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—';
+  const locale = getLocale(i18n.language);
+  const fmt = (iso) => formatTimeOrDash(iso, locale);
 
   return (
     <div>
@@ -775,11 +785,11 @@ function ParticipantsTab() {
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Ticket</th>
-              <th>Slot</th>
-              <th>Status</th>
-              <th>Rennzeit</th>
+              <th>{t('admin.participants.colName')}</th>
+              <th>{t('admin.participants.colTicket')}</th>
+              <th>{t('admin.participants.colSlot')}</th>
+              <th>{t('admin.participants.colStatus')}</th>
+              <th>{t('admin.participants.colRaceTime')}</th>
             </tr>
           </thead>
           <tbody>
@@ -787,7 +797,7 @@ function ParticipantsTab() {
               <tr key={p.id}>
                 <td>{p.nick_name}</td>
                 <td style={{ fontFamily: 'monospace' }}>{p.ticket_number}</td>
-                <td>{formatTime(p.slot_time)}</td>
+                <td>{fmt(p.slot_time)}</td>
                 <td>
                   {p.slot_status ? (
                     <span className={`badge ${p.slot_status === 'completed' ? 'badge-success' : p.slot_status === 'booked' ? 'badge-primary' : 'badge-muted'}`}>

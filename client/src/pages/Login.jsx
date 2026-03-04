@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LangSwitcher from '../components/LangSwitcher';
 const logoSrc = '/logo.png';
 import './Login.css';
 
 export default function Login() {
   const { auth, login, register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [nickName, setNickName] = useState('');
   const [nickNameConfirm, setNickNameConfirm] = useState('');
@@ -39,11 +42,11 @@ export default function Login() {
     setError('');
     if (isRegister) {
       if (nickName !== nickNameConfirm) {
-        setError('Die Nicknames stimmen nicht überein');
+        setError(t('login.errorNicknamesMismatch'));
         return;
       }
       if (ticketNumber !== ticketNumberConfirm) {
-        setError('Die Ticket-Nummern stimmen nicht überein');
+        setError(t('login.errorTicketsMismatch'));
         return;
       }
     }
@@ -72,29 +75,30 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card card">
+        <div className="login-card-top">
+          <LangSwitcher />
+        </div>
         <div className="login-logo"><img src={logoSrc} alt="Mario Kart Turnier" /></div>
-        <h1>Mario Kart Turnier</h1>
+        <h1>{t('login.title')}</h1>
         <p className="login-subtitle">
-          {isRegister
-            ? 'Wähle deinen Nickname und gib deine 5-stellige Ticket-Nummer ein'
-            : 'Melde dich mit deinem Namen und Ticket-Code an'}
+          {isRegister ? t('login.subtitleRegister') : t('login.subtitleLogin')}
         </p>
         <form onSubmit={handleSubmit} className="login-form">
           <div className={isRegister ? 'form-segment' : ''}>
             {isRegister && (
               <p className="register-rules">
-                Bitte wähle einen respektvollen Nickname. Anstößige, beleidigende oder unangemessene Namen sind nicht erlaubt und können zum Ausschluss vom Turnier führen.
+                {t('login.rules')}
                 <br /><br />
-                Erlaubt: Buchstaben (a–z, A–Z), Zahlen (0–9), Unterstrich (_), Bindestrich (-) und Punkt (.) · 3–30 Zeichen
+                {t('login.rulesAllowed')}
               </p>
             )}
             <div className="form-group">
-              <label htmlFor="nickName">Nickname</label>
+              <label htmlFor="nickName">{t('login.nickname')}</label>
               <input
                 id="nickName"
                 className="input"
                 type="text"
-                placeholder="Dein Nickname"
+                placeholder={t('login.nicknamePlaceholder')}
                 value={nickName}
                 onChange={(e) => setNickName(e.target.value)}
                 required
@@ -107,12 +111,12 @@ export default function Login() {
             </div>
             {isRegister && (
               <div className="form-group">
-                <label htmlFor="nickNameConfirm">Nickname bestätigen</label>
+                <label htmlFor="nickNameConfirm">{t('login.nicknameConfirm')}</label>
                 <input
                   id="nickNameConfirm"
                   className="input"
                   type="text"
-                  placeholder="Nickname wiederholen"
+                  placeholder={t('login.nicknameConfirmPlaceholder')}
                   value={nickNameConfirm}
                   onChange={(e) => setNickNameConfirm(e.target.value)}
                   required
@@ -126,11 +130,11 @@ export default function Login() {
           <div className={isRegister ? 'form-segment' : ''}>
             {isRegister && (
               <p className="input-hint">
-                Die Ticket-Nummer findest du auf deinem ausgedruckten Konferenz-Ticket oder im DOAG-Profil unter <em>Meine Aktivitäten → Tickets &amp; Übernachtungen → Teilnehmerdetails</em>.
+                {t('login.ticketHint')}
               </p>
             )}
             <div className="form-group">
-              <label htmlFor="ticketNumber">Ticket-Nummer (5 Ziffern)</label>
+              <label htmlFor="ticketNumber">{t('login.ticketNumber')}</label>
               <input
                 id="ticketNumber"
                 className="input"
@@ -146,7 +150,7 @@ export default function Login() {
             </div>
             {isRegister && (
               <div className="form-group">
-                <label htmlFor="ticketNumberConfirm">Ticket-Nummer bestätigen</label>
+                <label htmlFor="ticketNumberConfirm">{t('login.ticketConfirm')}</label>
                 <input
                   id="ticketNumberConfirm"
                   className="input"
@@ -166,7 +170,7 @@ export default function Login() {
           {rateLimitSeconds > 0 && (
             <div className="rate-limit-notice">
               <span className="rate-limit-timer">{rateLimitSeconds}s</span>
-              Zu viele Versuche — bitte warte kurz.
+              {t('common.rateLimitNotice')}
             </div>
           )}
           <button
@@ -176,31 +180,31 @@ export default function Login() {
             style={{ width: '100%' }}
           >
             {loading
-              ? (isRegister ? 'Registrieren...' : 'Anmelden...')
+              ? (isRegister ? t('login.registering') : t('login.loggingIn'))
               : rateLimitSeconds > 0
-              ? `Warte ${rateLimitSeconds}s`
-              : (isRegister ? 'Registrieren' : 'Anmelden')}
+              ? t('common.waiting', { seconds: rateLimitSeconds })
+              : (isRegister ? t('login.register') : t('login.login'))}
           </button>
         </form>
         <div className="login-mode-switch">
           {isRegister ? (
             <>
-              Bereits registriert?{' '}
-              <button className="btn-link" onClick={() => switchMode('login')}>Anmelden</button>
+              {t('login.alreadyRegistered')}{' '}
+              <button className="btn-link" onClick={() => switchMode('login')}>{t('login.switchToLogin')}</button>
             </>
           ) : (
             <>
-              Noch kein Account?{' '}
-              <button className="btn-link" onClick={() => switchMode('register')}>Jetzt registrieren</button>
+              {t('login.noAccount')}{' '}
+              <button className="btn-link" onClick={() => switchMode('register')}>{t('login.registerNow')}</button>
             </>
           )}
         </div>
         <div className="login-links">
-          <Link to="/leaderboard">Rangliste</Link>
+          <Link to="/leaderboard">{t('login.leaderboard')}</Link>
           <span>·</span>
-          <Link to="/bracket">Finals</Link>
+          <Link to="/bracket">{t('login.finals')}</Link>
           <span>·</span>
-          <Link to="/admin/login">Admin</Link>
+          <Link to="/admin/login">{t('login.admin')}</Link>
         </div>
         <a
           href="https://github.com/st3v0rr/mario-cart-tournament-app"

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Slots from './pages/Slots';
@@ -13,7 +14,8 @@ import './App.css';
 
 function PrivateRoute({ children, role }) {
   const { auth, loading } = useAuth();
-  if (loading) return <div className="loading">Laden...</div>;
+  const { t } = useTranslation();
+  if (loading) return <div className="loading">{t('common.loading')}</div>;
   if (!auth?.authenticated) return <Navigate to="/login" replace />;
   if (role && auth.role !== role) return <Navigate to="/" replace />;
   return children;
@@ -21,9 +23,10 @@ function PrivateRoute({ children, role }) {
 
 export default function App() {
   const { auth, loading } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
 
-  if (loading) return <div className="loading">Laden...</div>;
+  if (loading) return <div className="loading">{t('common.loading')}</div>;
 
   return (
     <>

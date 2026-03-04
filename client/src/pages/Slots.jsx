@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { getLocale, formatTime } from '../utils/locale';
 import './Slots.css';
 
 export default function Slots() {
   const { auth } = useAuth();
+  const { t, i18n } = useTranslation();
   const [slots, setSlots] = useState([]);
   const [mySlot, setMySlot] = useState(null);
   const [error, setError] = useState('');
@@ -29,10 +32,7 @@ export default function Slots() {
 
   useEffect(() => { load(); }, [load]);
 
-  const formatTime = (iso) => {
-    const d = new Date(iso);
-    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  };
+  const locale = getLocale(i18n.language);
 
   const canBook = (slot) => {
     if (mySlot) return false;
@@ -52,7 +52,7 @@ export default function Slots() {
     setActionId(id); setError(''); setMsg('');
     try {
       await api.bookSlot(id);
-      setMsg('Slot erfolgreich gebucht!');
+      setMsg(t('slots.bookSuccess'));
       await load();
     } catch (err) {
       setError(err.message);
@@ -62,11 +62,11 @@ export default function Slots() {
   };
 
   const cancel = async (id) => {
-    if (!confirm('Buchung wirklich stornieren?')) return;
+    if (!confirm(t('slots.cancelConfirm'))) return;
     setActionId(id); setError(''); setMsg('');
     try {
       await api.cancelSlot(id);
-      setMsg('Buchung storniert.');
+      setMsg(t('slots.cancelSuccess'));
       await load();
     } catch (err) {
       setError(err.message);
@@ -75,21 +75,23 @@ export default function Slots() {
     }
   };
 
-  if (loading) return <div className="page"><p style={{ color: 'var(--color-text-muted)' }}>Laden...</p></div>;
+  if (loading) return <div className="page"><p style={{ color: 'var(--color-text-muted)' }}>{t('common.loading')}</p></div>;
 
   const statusLabel = (s) => {
-    if (s === 'available') return { label: 'Frei', cls: 'badge-success' };
-    if (s === 'booked') return { label: 'Belegt', cls: 'badge-primary' };
-    return { label: 'Abgeschlossen', cls: 'badge-muted' };
+    if (s === 'available') return { label: t('slots.available'), cls: 'badge-success' };
+    if (s === 'booked') return { label: t('slots.booked'), cls: 'badge-primary' };
+    return { label: t('slots.completed'), cls: 'badge-muted' };
   };
+
+  const clockSuffix = t('slots.clock');
 
   return (
     <div className="page">
-      <h1>Time Trial Slots</h1>
+      <h1>{t('slots.title')}</h1>
       {mySlot && (
         <div className="card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
-          <strong>Dein Slot:</strong> {formatTime(mySlot.start_time)} Uhr
-          <span className="badge badge-primary" style={{ marginLeft: 8 }}>Gebucht</span>
+          <strong>{t('slots.mySlot')}</strong> {formatTime(mySlot.start_time, locale)}{clockSuffix ? ` ${clockSuffix}` : ''}
+          <span className="badge badge-primary" style={{ marginLeft: 8 }}>{t('slots.booked')}</span>
         </div>
       )}
       {error && <p className="error-msg">{error}</p>}
@@ -100,10 +102,10 @@ export default function Slots() {
           const isMine = mySlot?.id === slot.id;
           return (
             <div key={slot.id} className={`slot-card ${isMine ? 'slot-mine' : ''}`}>
-              <div className="slot-time">{formatTime(slot.start_time)}</div>
+              <div className="slot-time">{formatTime(slot.start_time, locale)}</div>
               <span className={`badge ${cls}`}>{label}</span>
               {slot.participant_name && (
-                <div className="slot-player">{isMine ? 'Du' : slot.participant_name}</div>
+                <div className="slot-player">{isMine ? t('slots.me') : slot.participant_name}</div>
               )}
               {slot.race_time && (
                 <div className="slot-race-time">{slot.race_time}</div>
@@ -116,7 +118,7 @@ export default function Slots() {
                       onClick={() => book(slot.id)}
                       disabled={actionId === slot.id}
                     >
-                      Buchen
+                      {t('slots.book')}
                     </button>
                   )}
                   {canCancel(slot) && (
@@ -125,7 +127,7 @@ export default function Slots() {
                       onClick={() => cancel(slot.id)}
                       disabled={actionId === slot.id}
                     >
-                      Stornieren
+                      {t('slots.cancel')}
                     </button>
                   )}
                 </div>

@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { getLocale, formatTimeOrDash } from '../utils/locale';
 
 export default function Dashboard() {
   const { auth } = useAuth();
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [cancelling, setCancelling] = useState(false);
@@ -30,32 +33,31 @@ export default function Dashboard() {
   };
 
   if (error) return <div className="page"><p className="error-msg">{error}</p></div>;
-  if (!data) return <div className="page"><p style={{ color: 'var(--color-text-muted)' }}>Laden...</p></div>;
+  if (!data) return <div className="page"><p style={{ color: 'var(--color-text-muted)' }}>{t('common.loading')}</p></div>;
 
-  const formatTime = (iso) => {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  };
+  const locale = getLocale(i18n.language);
+  const formatTime = (iso) => formatTimeOrDash(iso, locale);
+
+  const clockSuffix = t('dashboard.clock');
 
   return (
     <div className="page">
-      <h1>Hallo, {data.nick_name}! 👋</h1>
+      <h1>{t('dashboard.greeting', { name: data.nick_name })}</h1>
 
       <div className="card">
-        <h2>Mein Time Trial Slot</h2>
+        <h2>{t('dashboard.mySlot')}</h2>
         {data.slot ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
             <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
               <span style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                {formatTime(data.slot.start_time)} Uhr
+                {formatTime(data.slot.start_time)}{clockSuffix ? ` ${clockSuffix}` : ''}
               </span>
               <span className={`badge badge-${data.slot.status === 'completed' ? 'success' : data.slot.status === 'booked' ? 'primary' : 'muted'}`}>
-                {data.slot.status === 'completed' ? 'Abgeschlossen' : data.slot.status === 'booked' ? 'Gebucht' : data.slot.status}
+                {data.slot.status === 'completed' ? t('dashboard.completed') : data.slot.status === 'booked' ? t('dashboard.booked') : data.slot.status}
               </span>
             </div>
             {data.slot.race_time && (
-              <p>Zeit: <strong>{data.slot.race_time}</strong></p>
+              <p>{t('dashboard.raceTime')} <strong>{data.slot.race_time}</strong></p>
             )}
             {data.slot.status === 'booked' && (
               <div style={{ marginTop: 'var(--spacing-sm)' }}>
@@ -64,7 +66,7 @@ export default function Dashboard() {
                   onClick={handleCancel}
                   disabled={cancelling}
                 >
-                  {cancelling ? 'Wird storniert…' : 'Slot stornieren'}
+                  {cancelling ? t('dashboard.cancelling') : t('dashboard.cancelSlot')}
                 </button>
                 {cancelError && <p className="error-msg" style={{ marginTop: 'var(--spacing-xs)' }}>{cancelError}</p>}
               </div>
@@ -73,31 +75,31 @@ export default function Dashboard() {
         ) : (
           <div>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-md)' }}>
-              Du hast noch keinen Slot gebucht.
+              {t('dashboard.noSlot')}
             </p>
-            <Link to="/slots" className="btn btn-primary">Slot buchen</Link>
+            <Link to="/slots" className="btn btn-primary">{t('dashboard.bookSlot')}</Link>
           </div>
         )}
       </div>
 
       {data.rank && (
         <div className="card">
-          <h2>Meine Platzierung</h2>
+          <h2>{t('dashboard.myRanking')}</h2>
           <p style={{ fontSize: '2rem', fontWeight: 700 }}>
             #{data.rank}
-            {data.rank <= 8 && <span style={{ color: 'var(--color-gold)', marginLeft: 8 }}>🏆 Top 8!</span>}
+            {data.rank <= 8 && <span style={{ color: 'var(--color-gold)', marginLeft: 8 }}>{t('dashboard.top8')}</span>}
           </p>
         </div>
       )}
 
       {data.bracket?.length > 0 && (
         <div className="card">
-          <h2>Bracket</h2>
+          <h2>{t('dashboard.bracket')}</h2>
           {data.bracket.map((b, i) => (
             <div key={i}>
-              <strong>{b.round === 'semifinal' ? 'Semifinale' : 'Finale'}</strong>
-              {b.group_number && ` · Gruppe ${b.group_number}`}
-              {b.position && ` · Platz ${b.position}`}
+              <strong>{b.round === 'semifinal' ? t('dashboard.semifinal') : t('dashboard.final')}</strong>
+              {b.group_number && ` · ${t('dashboard.group')} ${b.group_number}`}
+              {b.position && ` · ${t('dashboard.place')} ${b.position}`}
             </div>
           ))}
         </div>

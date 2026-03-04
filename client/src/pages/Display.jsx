@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { useTranslation } from 'react-i18next';
+import { getLocale } from '../utils/locale';
+import LangSwitcher from '../components/LangSwitcher';
 const logoSrc = '/logo.png';
 import './Display.css';
 
@@ -13,6 +16,7 @@ export default function Display() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [bracket, setBracket] = useState([]);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const { i18n } = useTranslation();
 
   const loadData = useCallback(async () => {
     const [lbResult, brResult] = await Promise.allSettled([
@@ -39,17 +43,21 @@ export default function Display() {
 
   const navigate = useNavigate();
   const view = VIEWS[viewIndex];
+  const locale = getLocale(i18n.language);
 
   return (
     <div className="display">
       <div className="display-header">
-        <button className="display-home-btn" onClick={() => navigate(-1)} title="Zurück">←</button>
+        <button className="display-home-btn" onClick={() => navigate(-1)} title="Back">←</button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="display-header-logo" />
-        {lastUpdate && (
-          <span className="display-update">
-            {lastUpdate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+          {lastUpdate && (
+            <span className="display-update">
+              {lastUpdate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          <LangSwitcher />
+        </div>
       </div>
       <div className="display-dots">
         {VIEWS.map((v, i) => (
@@ -75,18 +83,19 @@ export default function Display() {
 }
 
 function DisplayLeaderboard({ rows }) {
+  const { t } = useTranslation();
   return (
     <div className="display-section">
-      <h2 className="display-section-title">🏆 Top 10 – Zeitfahren</h2>
+      <h2 className="display-section-title">{t('display.leaderboardTitle')}</h2>
       {rows.length === 0 ? (
-        <p className="display-empty">Noch keine Ergebnisse</p>
+        <p className="display-empty">{t('display.empty')}</p>
       ) : (
         <div className="display-leaderboard">
           {rows.map((row, i) => (
             <>
               {i === 8 && (
                 <div key="divider" className="display-lb-divider">
-                  <span>Nachrücker</span>
+                  <span>{t('display.reserve')}</span>
                 </div>
               )}
               <div key={i} className={`display-lb-row${i >= 8 ? ' display-lb-row--reserve' : ''}`}>
@@ -103,6 +112,7 @@ function DisplayLeaderboard({ rows }) {
 }
 
 function DisplayBracket({ entries }) {
+  const { t } = useTranslation();
   const semifinal = entries.filter((e) => e.round === 'semifinal');
   const final = entries.filter((e) => e.round === 'final');
   const g1 = semifinal.filter((e) => e.group_number === 1).sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
@@ -112,23 +122,23 @@ function DisplayBracket({ entries }) {
   if (entries.length === 0) {
     return (
       <div className="display-section">
-        <h2 className="display-section-title">🏁 Finals</h2>
-        <p className="display-empty">Bracket wird nach den Time Trials angezeigt</p>
+        <h2 className="display-section-title">{t('display.finalsTitle')}</h2>
+        <p className="display-empty">{t('display.bracketEmpty')}</p>
       </div>
     );
   }
 
   return (
     <div className="display-section display-section--wide">
-      <h2 className="display-section-title">🏁 Finals</h2>
+      <h2 className="display-section-title">{t('display.finalsTitle')}</h2>
       <div className="bracket-tree">
         <div className="bracket-semis">
-          <BracketColumn title="Semifinal 1" entries={g1} />
-          <BracketColumn title="Semifinal 2" entries={g2} />
+          <BracketColumn title={t('display.semifinal1')} entries={g1} />
+          <BracketColumn title={t('display.semifinal2')} entries={g2} />
         </div>
         <div className="bracket-final-row">
           <div className="bracket-down-arrow">↓</div>
-          <BracketColumn title="🏆 Finale" entries={finalSorted} isFinal />
+          <BracketColumn title={t('display.finalTitle')} entries={finalSorted} isFinal />
         </div>
       </div>
     </div>
@@ -164,6 +174,7 @@ function BracketColumn({ title, entries, isFinal = false }) {
 }
 
 function DisplaySchedule() {
+  const { t } = useTranslation();
   const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
@@ -177,9 +188,9 @@ function DisplaySchedule() {
 
   return (
     <div className="display-section">
-      <h2 className="display-section-title">📅 Zeitplan</h2>
+      <h2 className="display-section-title">{t('display.scheduleTitle')}</h2>
       <div className="display-schedule">
-        {schedule.length === 0 && <p className="display-empty">Kein Zeitplan hinterlegt</p>}
+        {schedule.length === 0 && <p className="display-empty">{t('display.noSchedule')}</p>}
         {schedule.map((item, i) => {
           const isPast = (item.time_to || item.time_from) < currentTime;
           const isNow = i < schedule.length - 1
@@ -190,7 +201,7 @@ function DisplaySchedule() {
             <div key={item.id} className={`display-schedule-row ${isNow ? 'current' : isPast ? 'past' : ''}`}>
               <span className="display-schedule-time">{timeLabel}</span>
               <span className="display-schedule-event">{item.event}</span>
-              {isNow && <span className="display-schedule-now">▶ JETZT</span>}
+              {isNow && <span className="display-schedule-now">{t('display.now')}</span>}
             </div>
           );
         })}
