@@ -42,7 +42,11 @@ export default function App() {
           path="/"
           element={
             auth?.authenticated ? (
-              auth.role === 'admin' ? <Navigate to="/admin" replace /> : <Dashboard />
+              auth.role === 'admin' ? (
+                <Navigate to="/admin" replace />
+              ) : (
+                <Dashboard />
+              )
             ) : (
               <Navigate to="/login" replace />
             )

@@ -19,10 +19,7 @@ export default function Display() {
   const { i18n } = useTranslation();
 
   const loadData = useCallback(async () => {
-    const [lbResult, brResult] = await Promise.allSettled([
-      api.getLeaderboard(),
-      api.getBracket(),
-    ]);
+    const [lbResult, brResult] = await Promise.allSettled([api.getLeaderboard(), api.getBracket()]);
     if (lbResult.status === 'fulfilled') setLeaderboard(lbResult.value);
     if (brResult.status === 'fulfilled') setBracket(brResult.value);
     setLastUpdate(new Date());
@@ -48,7 +45,9 @@ export default function Display() {
   return (
     <div className="display">
       <div className="display-header">
-        <button className="display-home-btn" onClick={() => navigate(-1)} title="Back">←</button>
+        <button className="display-home-btn" onClick={() => navigate(-1)} title="Back">
+          ←
+        </button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="display-header-logo" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
           {lastUpdate && (
@@ -115,8 +114,12 @@ function DisplayBracket({ entries }) {
   const { t } = useTranslation();
   const semifinal = entries.filter((e) => e.round === 'semifinal');
   const final = entries.filter((e) => e.round === 'final');
-  const g1 = semifinal.filter((e) => e.group_number === 1).sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
-  const g2 = semifinal.filter((e) => e.group_number === 2).sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  const g1 = semifinal
+    .filter((e) => e.group_number === 1)
+    .sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  const g2 = semifinal
+    .filter((e) => e.group_number === 2)
+    .sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
   const finalSorted = [...final].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
 
   if (entries.length === 0) {
@@ -178,8 +181,18 @@ function DisplaySchedule() {
   const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
-    api.getSchedule().then(setSchedule).catch(() => {});
-    const iv = setInterval(() => api.getSchedule().then(setSchedule).catch(() => {}), 30000);
+    api
+      .getSchedule()
+      .then(setSchedule)
+      .catch(() => {});
+    const iv = setInterval(
+      () =>
+        api
+          .getSchedule()
+          .then(setSchedule)
+          .catch(() => {}),
+      30000
+    );
     return () => clearInterval(iv);
   }, []);
 
@@ -193,12 +206,16 @@ function DisplaySchedule() {
         {schedule.length === 0 && <p className="display-empty">{t('display.noSchedule')}</p>}
         {schedule.map((item, i) => {
           const isPast = (item.time_to || item.time_from) < currentTime;
-          const isNow = i < schedule.length - 1
-            ? item.time_from <= currentTime && schedule[i + 1].time_from > currentTime
-            : item.time_from <= currentTime;
+          const isNow =
+            i < schedule.length - 1
+              ? item.time_from <= currentTime && schedule[i + 1].time_from > currentTime
+              : item.time_from <= currentTime;
           const timeLabel = item.time_to ? `${item.time_from}–${item.time_to}` : item.time_from;
           return (
-            <div key={item.id} className={`display-schedule-row ${isNow ? 'current' : isPast ? 'past' : ''}`}>
+            <div
+              key={item.id}
+              className={`display-schedule-row ${isNow ? 'current' : isPast ? 'past' : ''}`}
+            >
               <span className="display-schedule-time">{timeLabel}</span>
               <span className="display-schedule-event">{item.event}</span>
               {isNow && <span className="display-schedule-now">{t('display.now')}</span>}

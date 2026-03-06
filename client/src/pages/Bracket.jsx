@@ -28,16 +28,24 @@ export default function Bracket() {
 
   const semifinal = entries.filter((e) => e.round === 'semifinal');
   const final = entries.filter((e) => e.round === 'final');
-  const g1 = semifinal.filter((e) => e.group_number === 1).sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
-  const g2 = semifinal.filter((e) => e.group_number === 2).sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  const g1 = semifinal
+    .filter((e) => e.group_number === 1)
+    .sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  const g2 = semifinal
+    .filter((e) => e.group_number === 2)
+    .sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
   const finalSorted = [...final].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
 
   return (
     <div className="lb-mobile">
       <div className="display-header">
-        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>←</button>
+        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>
+          ←
+        </button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="lb-header-logo" />
-        <button className="btn btn-secondary btn-sm" onClick={load}>↻</button>
+        <button className="btn btn-secondary btn-sm" onClick={load}>
+          ↻
+        </button>
       </div>
 
       <div className="lb-mobile-content">
@@ -69,7 +77,9 @@ function BracketColumn({ title, entries, isFinal = false }) {
       <div className="bracket-col-title">{title}</div>
       <div className="bracket-col-entries">
         {entries.length === 0 ? (
-          <div className="bracket-empty" style={{ fontSize: '1.1rem', padding: '12px' }}>–</div>
+          <div className="bracket-empty" style={{ fontSize: '1.1rem', padding: '12px' }}>
+            –
+          </div>
         ) : (
           entries.map((e, _i) => {
             const isWinner = isFinal && e.position === 1;

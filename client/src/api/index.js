@@ -25,11 +25,14 @@ async function request(method, path, body) {
 export const api = {
   // Auth
   register: (nick_name, nick_name_confirm, ticket_number, ticket_number_confirm) =>
-    request('POST', '/auth/register', { nick_name, nick_name_confirm, ticket_number, ticket_number_confirm }),
-  login: (nick_name, ticket_number) =>
-    request('POST', '/auth/login', { nick_name, ticket_number }),
-  adminLogin: (username, password) =>
-    request('POST', '/auth/admin/login', { username, password }),
+    request('POST', '/auth/register', {
+      nick_name,
+      nick_name_confirm,
+      ticket_number,
+      ticket_number_confirm,
+    }),
+  login: (nick_name, ticket_number) => request('POST', '/auth/login', { nick_name, ticket_number }),
+  adminLogin: (username, password) => request('POST', '/auth/admin/login', { username, password }),
   logout: () => request('POST', '/auth/logout'),
   me: () => request('GET', '/auth/me'),
 
@@ -61,7 +64,8 @@ export const api = {
 
   // Admin schedule
   adminGetSchedule: () => request('GET', '/admin/schedule'),
-  adminAddScheduleEvent: (time_from, event, time_to) => request('POST', '/admin/schedule', { time_from, time_to, event }),
+  adminAddScheduleEvent: (time_from, event, time_to) =>
+    request('POST', '/admin/schedule', { time_from, time_to, event }),
   adminUpdateScheduleEvent: (id, data) => request('PATCH', `/admin/schedule/${id}`, data),
   adminDeleteScheduleEvent: (id) => request('DELETE', `/admin/schedule/${id}`),
 

@@ -78,7 +78,9 @@ export default function Login() {
         <div className="login-card-top">
           <LangSwitcher />
         </div>
-        <div className="login-logo"><img src={logoSrc} alt="Mario Kart Turnier" /></div>
+        <div className="login-logo">
+          <img src={logoSrc} alt="Mario Kart Turnier" />
+        </div>
         <h1>{t('login.title')}</h1>
         <p className="login-subtitle">
           {isRegister ? t('login.subtitleRegister') : t('login.subtitleLogin')}
@@ -88,7 +90,8 @@ export default function Login() {
             {isRegister && (
               <p className="register-rules">
                 {t('login.rules')}
-                <br /><br />
+                <br />
+                <br />
                 {t('login.rulesAllowed')}
               </p>
             )}
@@ -128,11 +131,7 @@ export default function Login() {
             )}
           </div>
           <div className={isRegister ? 'form-segment' : ''}>
-            {isRegister && (
-              <p className="input-hint">
-                {t('login.ticketHint')}
-              </p>
-            )}
+            {isRegister && <p className="input-hint">{t('login.ticketHint')}</p>}
             <div className="form-group">
               <label htmlFor="ticketNumber">{t('login.ticketNumber')}</label>
               <input
@@ -157,7 +156,9 @@ export default function Login() {
                   type="text"
                   placeholder="12345"
                   value={ticketNumberConfirm}
-                  onChange={(e) => setTicketNumberConfirm(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  onChange={(e) =>
+                    setTicketNumberConfirm(e.target.value.replace(/\D/g, '').slice(0, 5))
+                  }
                   maxLength={5}
                   pattern="\d{5}"
                   required
@@ -180,22 +181,30 @@ export default function Login() {
             style={{ width: '100%' }}
           >
             {loading
-              ? (isRegister ? t('login.registering') : t('login.loggingIn'))
+              ? isRegister
+                ? t('login.registering')
+                : t('login.loggingIn')
               : rateLimitSeconds > 0
-              ? t('common.waiting', { seconds: rateLimitSeconds })
-              : (isRegister ? t('login.register') : t('login.login'))}
+                ? t('common.waiting', { seconds: rateLimitSeconds })
+                : isRegister
+                  ? t('login.register')
+                  : t('login.login')}
           </button>
         </form>
         <div className="login-mode-switch">
           {isRegister ? (
             <>
               {t('login.alreadyRegistered')}{' '}
-              <button className="btn-link" onClick={() => switchMode('login')}>{t('login.switchToLogin')}</button>
+              <button className="btn-link" onClick={() => switchMode('login')}>
+                {t('login.switchToLogin')}
+              </button>
             </>
           ) : (
             <>
               {t('login.noAccount')}{' '}
-              <button className="btn-link" onClick={() => switchMode('register')}>{t('login.registerNow')}</button>
+              <button className="btn-link" onClick={() => switchMode('register')}>
+                {t('login.registerNow')}
+              </button>
             </>
           )}
         </div>

@@ -29,15 +29,21 @@ export default function Leaderboard() {
   return (
     <div className="lb-mobile">
       <div className="display-header">
-        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>←</button>
+        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>
+          ←
+        </button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="lb-header-logo" />
-        <button className="btn btn-secondary btn-sm" onClick={load}>↻</button>
+        <button className="btn btn-secondary btn-sm" onClick={load}>
+          ↻
+        </button>
       </div>
 
       <div className="lb-mobile-content">
         <h2 className="lb-mobile-title">{t('leaderboard.title')}</h2>
         {rows.length === 0 ? (
-          <p className="display-empty" style={{ fontSize: '1rem', padding: '24px' }}>{t('leaderboard.empty')}</p>
+          <p className="display-empty" style={{ fontSize: '1rem', padding: '24px' }}>
+            {t('leaderboard.empty')}
+          </p>
         ) : (
           <div className="display-leaderboard">
             {rows.map((row, i) => (

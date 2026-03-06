@@ -46,41 +46,59 @@ export default function AdminLogin() {
   return (
     <div className="lb-mobile" style={{ minHeight: '100vh' }}>
       <div className="display-header">
-        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>←</button>
+        <button className="lb-back-btn" onClick={() => navigate(-1)} title={t('common.back')}>
+          ←
+        </button>
         <img src={logoSrc} alt="Mario Kart Turnier" className="lb-header-logo" />
         <LangSwitcher />
       </div>
       <div className="login-page" style={{ flex: 1 }}>
-      <div className="login-card card">
-        <div className="login-logo">⚙️</div>
-        <h1>{t('adminLogin.title')}</h1>
-        <p className="login-subtitle">{t('adminLogin.subtitle')}</p>
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label>{t('adminLogin.username')}</label>
-            <input className="input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>{t('adminLogin.password')}</label>
-            <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          </div>
-          {error && <p className="error-msg">{error}</p>}
-          {rateLimitSeconds > 0 && (
-            <div className="rate-limit-notice">
-              <span className="rate-limit-timer">{rateLimitSeconds}s</span>
-              {t('common.rateLimitNotice')}
+        <div className="login-card card">
+          <div className="login-logo">⚙️</div>
+          <h1>{t('adminLogin.title')}</h1>
+          <p className="login-subtitle">{t('adminLogin.subtitle')}</p>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label>{t('adminLogin.username')}</label>
+              <input
+                className="input"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
-          )}
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading || rateLimitSeconds > 0}
-            style={{ width: '100%' }}
-          >
-            {loading ? t('adminLogin.loggingIn') : rateLimitSeconds > 0 ? t('common.waiting', { seconds: rateLimitSeconds }) : t('adminLogin.login')}
-          </button>
-        </form>
-      </div>
+            <div className="form-group">
+              <label>{t('adminLogin.password')}</label>
+              <input
+                className="input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="error-msg">{error}</p>}
+            {rateLimitSeconds > 0 && (
+              <div className="rate-limit-notice">
+                <span className="rate-limit-timer">{rateLimitSeconds}s</span>
+                {t('common.rateLimitNotice')}
+              </div>
+            )}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || rateLimitSeconds > 0}
+              style={{ width: '100%' }}
+            >
+              {loading
+                ? t('adminLogin.loggingIn')
+                : rateLimitSeconds > 0
+                  ? t('common.waiting', { seconds: rateLimitSeconds })
+                  : t('adminLogin.login')}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

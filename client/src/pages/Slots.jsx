@@ -31,7 +31,9 @@ export default function Slots() {
     }
   }, [auth]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const locale = getLocale(i18n.language);
 
@@ -43,7 +45,9 @@ export default function Slots() {
   };
 
   const book = async (id) => {
-    setActionId(id); setError(''); setMsg('');
+    setActionId(id);
+    setError('');
+    setMsg('');
     try {
       await api.bookSlot(id);
       setMsg(t('slots.bookSuccess'));
@@ -55,7 +59,12 @@ export default function Slots() {
     }
   };
 
-  if (loading) return <div className="page"><p style={{ color: 'var(--color-text-muted)' }}>{t('common.loading')}</p></div>;
+  if (loading)
+    return (
+      <div className="page">
+        <p style={{ color: 'var(--color-text-muted)' }}>{t('common.loading')}</p>
+      </div>
+    );
 
   const statusLabel = (s) => {
     if (s === 'available') return { label: t('slots.available'), cls: 'badge-success' };
@@ -70,18 +79,25 @@ export default function Slots() {
       <h1>{t('slots.title')}</h1>
       {mySlot && (
         <div className="card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
-          <strong>{t('slots.mySlot')}</strong> {formatTime(mySlot.start_time, locale)}{clockSuffix ? ` ${clockSuffix}` : ''}
-          <span className="badge badge-primary" style={{ marginLeft: 8 }}>{t('slots.booked')}</span>
+          <strong>{t('slots.mySlot')}</strong> {formatTime(mySlot.start_time, locale)}
+          {clockSuffix ? ` ${clockSuffix}` : ''}
+          <span className="badge badge-primary" style={{ marginLeft: 8 }}>
+            {t('slots.booked')}
+          </span>
           {mySlot.status === 'booked' && (
             <div style={{ marginTop: 'var(--spacing-sm)' }}>
               {cancelConfirming ? (
                 <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('slots.cancelConfirm')}</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                    {t('slots.cancelConfirm')}
+                  </span>
                   <button
                     className="btn btn-danger btn-sm"
                     disabled={actionId === mySlot.id}
                     onClick={async () => {
-                      setActionId(mySlot.id); setError(''); setMsg('');
+                      setActionId(mySlot.id);
+                      setError('');
+                      setMsg('');
                       try {
                         await api.cancelSlot(mySlot.id);
                         setMsg(t('slots.cancelSuccess'));
@@ -96,7 +112,10 @@ export default function Slots() {
                   >
                     {t('slots.cancel')}
                   </button>
-                  <button className="btn btn-secondary btn-sm" onClick={() => setCancelConfirming(false)}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setCancelConfirming(false)}
+                  >
                     {t('common.back')}
                   </button>
                 </div>
@@ -122,9 +141,7 @@ export default function Slots() {
               {slot.participant_name && (
                 <div className="slot-player">{isMine ? t('slots.me') : slot.participant_name}</div>
               )}
-              {slot.race_time && (
-                <div className="slot-race-time">{slot.race_time}</div>
-              )}
+              {slot.race_time && <div className="slot-race-time">{slot.race_time}</div>}
               {auth?.role === 'participant' && canBook(slot) && (
                 <div className="slot-actions">
                   <button

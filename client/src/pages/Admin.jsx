@@ -20,7 +20,11 @@ function TimeSelect({ value, onChange, required, style }) {
         onChange={(e) => set(e.target.value, m || '00')}
       >
         <option value="">hh</option>
-        {HOURS.map((hh) => <option key={hh} value={hh}>{hh}</option>)}
+        {HOURS.map((hh) => (
+          <option key={hh} value={hh}>
+            {hh}
+          </option>
+        ))}
       </select>
       <span style={{ alignSelf: 'center', color: 'var(--color-text-muted)' }}>:</span>
       <select
@@ -31,7 +35,11 @@ function TimeSelect({ value, onChange, required, style }) {
         onChange={(e) => set(h || '00', e.target.value)}
       >
         <option value="">mm</option>
-        {MINUTES.map((mm) => <option key={mm} value={mm}>{mm}</option>)}
+        {MINUTES.map((mm) => (
+          <option key={mm} value={mm}>
+            {mm}
+          </option>
+        ))}
       </select>
     </div>
   );
@@ -102,15 +110,19 @@ function SetupTab() {
 
   const loadStatus = useCallback(() => {
     setStatusError('');
-    api.adminSetupStatus()
+    api
+      .adminSetupStatus()
       .then(setStatus)
       .catch((e) => setStatusError(e.message));
   }, []);
 
-  useEffect(() => { loadStatus(); }, [loadStatus]);
+  useEffect(() => {
+    loadStatus();
+  }, [loadStatus]);
 
   const runMigrate = async () => {
-    setMigrateMsg(''); setMigrateError('');
+    setMigrateMsg('');
+    setMigrateError('');
     try {
       await api.adminMigrate();
       setMigrateMsg(t('admin.setup.dbInitialized'));
@@ -120,7 +132,8 @@ function SetupTab() {
   };
 
   const runReset = async () => {
-    setResetMsg(''); setResetError('');
+    setResetMsg('');
+    setResetError('');
     try {
       await api.adminResetDatabase();
       setResetMsg(t('admin.danger.resetSuccess'));
@@ -133,7 +146,9 @@ function SetupTab() {
 
   const runSeed = async (e) => {
     e.preventDefault();
-    setSeedMsg(''); setSeedError(''); setSeeding(true);
+    setSeedMsg('');
+    setSeedError('');
+    setSeeding(true);
     try {
       const res = await api.adminSeedSlots({
         date,
@@ -154,7 +169,9 @@ function SetupTab() {
 
   const runReschedule = async (e) => {
     e.preventDefault();
-    setRescheduleMsg(''); setRescheduleError(''); setRescheduling(true);
+    setRescheduleMsg('');
+    setRescheduleError('');
+    setRescheduling(true);
     try {
       const res = await api.adminReschedule({ new_date: rescheduleDate });
       setRescheduleMsg(t('admin.setup.rescheduleSuccess', { count: res.updated }));
@@ -168,7 +185,8 @@ function SetupTab() {
 
   const slotCount = status
     ? Math.floor(
-        ((Number(endTime.split(':')[0]) * 60 + Number(endTime.split(':')[1])) -
+        (Number(endTime.split(':')[0]) * 60 +
+          Number(endTime.split(':')[1]) -
           (Number(startTime.split(':')[0]) * 60 + Number(startTime.split(':')[1]))) /
           Number(slotDuration)
       )
@@ -179,13 +197,19 @@ function SetupTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-
       {/* DB Status */}
       <div className="card">
         <h2>{t('admin.setup.dbStatus')}</h2>
         {statusError && <p className="error-msg">{statusError}</p>}
         {status && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-sm)' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: 'var(--spacing-md)',
+              marginTop: 'var(--spacing-sm)',
+            }}
+          >
             <div className="stat-card">
               <span className="stat-label">{t('admin.setup.slotsTotal')}</span>
               <span className="stat-value">{status.slot_count}</span>
@@ -196,15 +220,23 @@ function SetupTab() {
             </div>
             <div className="stat-card">
               <span className="stat-label">{t('admin.setup.firstSlot')}</span>
-              <span className="stat-value" style={{ fontSize: '1rem' }}>{formatDt(status.nick_slot)}</span>
+              <span className="stat-value" style={{ fontSize: '1rem' }}>
+                {formatDt(status.nick_slot)}
+              </span>
             </div>
             <div className="stat-card">
               <span className="stat-label">{t('admin.setup.lastSlot')}</span>
-              <span className="stat-value" style={{ fontSize: '1rem' }}>{formatDt(status.last_slot)}</span>
+              <span className="stat-value" style={{ fontSize: '1rem' }}>
+                {formatDt(status.last_slot)}
+              </span>
             </div>
           </div>
         )}
-        <button className="btn btn-secondary" style={{ marginTop: 'var(--spacing-md)' }} onClick={loadStatus}>
+        <button
+          className="btn btn-secondary"
+          style={{ marginTop: 'var(--spacing-md)' }}
+          onClick={loadStatus}
+        >
           {t('admin.setup.refresh')}
         </button>
       </div>
@@ -212,7 +244,13 @@ function SetupTab() {
       {/* Seed */}
       <div className="card">
         <h2>{t('admin.setup.configTitle')}</h2>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)' }}>
+        <p
+          style={{
+            color: 'var(--color-text-muted)',
+            fontSize: '0.9rem',
+            marginBottom: 'var(--spacing-md)',
+          }}
+        >
           {t('admin.setup.configHint')}
         </p>
 
@@ -222,9 +260,19 @@ function SetupTab() {
           </div>
         )}
 
-        <form onSubmit={runSeed} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', maxWidth: 440 }}>
+        <form
+          onSubmit={runSeed}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--spacing-sm)',
+            maxWidth: 440,
+          }}
+        >
           <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.raceDay')}</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+              {t('admin.setup.raceDay')}
+            </span>
             <input
               type="date"
               className="input"
@@ -234,33 +282,48 @@ function SetupTab() {
             />
           </label>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)' }}>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)' }}
+          >
             <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.startTime')}</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                {t('admin.setup.startTime')}
+              </span>
               <TimeSelect value={startTime} onChange={setStartTime} required />
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.endTime')}</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                {t('admin.setup.endTime')}
+              </span>
               <TimeSelect value={endTime} onChange={setEndTime} required />
             </label>
           </div>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.slotDuration')}</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+              {t('admin.setup.slotDuration')}
+            </span>
             <select
               className="input"
               value={slotDuration}
               onChange={(e) => setSlotDuration(e.target.value)}
             >
               {[1, 2, 3, 5, 10, 15, 20, 30].map((d) => (
-                <option key={d} value={d}>{d} min</option>
+                <option key={d} value={d}>
+                  {d} min
+                </option>
               ))}
             </select>
           </label>
 
           {slotCount !== null && slotCount > 0 && (
             <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>
-              {t('admin.setup.slotsWillBeCreated', { count: slotCount, start: startTime, end: endTime, duration: slotDuration })}
+              {t('admin.setup.slotsWillBeCreated', {
+                count: slotCount,
+                start: startTime,
+                end: endTime,
+                duration: slotDuration,
+              })}
             </p>
           )}
 
@@ -272,9 +335,7 @@ function SetupTab() {
                 onChange={(e) => setClearExisting(e.target.checked)}
                 disabled={status?.booked_count > 0}
               />
-              <span style={{ fontSize: '0.9rem' }}>
-                {t('admin.setup.clearExisting')}
-              </span>
+              <span style={{ fontSize: '0.9rem' }}>{t('admin.setup.clearExisting')}</span>
             </label>
           )}
 
@@ -289,19 +350,34 @@ function SetupTab() {
             {seeding ? t('admin.setup.creating') : t('admin.setup.createSlots')}
           </button>
         </form>
-
       </div>
 
       {/* Reschedule */}
       {status?.slot_count > 0 && (
         <div className="card">
           <h2>{t('admin.setup.rescheduleTitle')}</h2>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)' }}>
+          <p
+            style={{
+              color: 'var(--color-text-muted)',
+              fontSize: '0.9rem',
+              marginBottom: 'var(--spacing-md)',
+            }}
+          >
             {t('admin.setup.rescheduleHint')}
           </p>
-          <form onSubmit={runReschedule} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', maxWidth: 440 }}>
+          <form
+            onSubmit={runReschedule}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-sm)',
+              maxWidth: 440,
+            }}
+          >
             <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.raceDay')}</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                {t('admin.setup.raceDay')}
+              </span>
               <input
                 type="date"
                 className="input"
@@ -332,9 +408,21 @@ function SetupTab() {
               {t('admin.danger.initHint')}
             </p>
           </div>
-          {migrateMsg && <p className="success-msg" style={{ margin: 0 }}>{migrateMsg}</p>}
-          {migrateError && <p className="error-msg" style={{ margin: 0 }}>{migrateError}</p>}
-          <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={runMigrate}>
+          {migrateMsg && (
+            <p className="success-msg" style={{ margin: 0 }}>
+              {migrateMsg}
+            </p>
+          )}
+          {migrateError && (
+            <p className="error-msg" style={{ margin: 0 }}>
+              {migrateError}
+            </p>
+          )}
+          <button
+            className="btn btn-secondary"
+            style={{ alignSelf: 'flex-start' }}
+            onClick={runMigrate}
+          >
             {t('admin.danger.init')}
           </button>
         </div>
@@ -348,9 +436,24 @@ function SetupTab() {
               {t('admin.danger.resetHint')}
             </p>
           </div>
-          {resetMsg && <p className="success-msg" style={{ margin: 0 }}>{resetMsg}</p>}
-          {resetError && <p className="error-msg" style={{ margin: 0 }}>{resetError}</p>}
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
+          {resetMsg && (
+            <p className="success-msg" style={{ margin: 0 }}>
+              {resetMsg}
+            </p>
+          )}
+          {resetError && (
+            <p className="error-msg" style={{ margin: 0 }}>
+              {resetError}
+            </p>
+          )}
+          <div
+            style={{
+              display: 'flex',
+              gap: 'var(--spacing-sm)',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <input
               className="input"
               style={{ maxWidth: 260 }}
@@ -385,7 +488,9 @@ function ScheduleEventsEditor() {
   const [error, setError] = useState('');
 
   const load = useCallback(() => api.adminGetSchedule().then(setEvents), []);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const startEdit = (ev) => {
     setEditId(ev.id);
@@ -394,7 +499,8 @@ function ScheduleEventsEditor() {
   const cancelEdit = () => setEditId(null);
 
   const saveEdit = async () => {
-    setMsg(''); setError('');
+    setMsg('');
+    setError('');
     try {
       await api.adminUpdateScheduleEvent(editId, {
         time_from: editData.time_from,
@@ -403,30 +509,48 @@ function ScheduleEventsEditor() {
       });
       setEditId(null);
       load();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   const del = async (id) => {
-    setMsg(''); setError('');
-    try { await api.adminDeleteScheduleEvent(id); load(); }
-    catch (e) { setError(e.message); }
+    setMsg('');
+    setError('');
+    try {
+      await api.adminDeleteScheduleEvent(id);
+      load();
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   const add = async (e) => {
     e.preventDefault();
-    setMsg(''); setError('');
+    setMsg('');
+    setError('');
     try {
       await api.adminAddScheduleEvent(newFrom, newEvent, newTo || null);
-      setNewFrom(''); setNewTo(''); setNewEvent('');
+      setNewFrom('');
+      setNewTo('');
+      setNewEvent('');
       setMsg(t('admin.schedule.added'));
       load();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
     <div className="card">
       <h2>{t('admin.schedule.title')}</h2>
-      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)' }}>
+      <p
+        style={{
+          color: 'var(--color-text-muted)',
+          fontSize: '0.9rem',
+          marginBottom: 'var(--spacing-md)',
+        }}
+      >
         {t('admin.schedule.hint')}
       </p>
 
@@ -444,35 +568,66 @@ function ScheduleEventsEditor() {
         </thead>
         <tbody>
           {events.length === 0 && (
-            <tr><td colSpan={4} style={{ color: 'var(--color-text-muted)', textAlign: 'center' }}>{t('admin.schedule.noEntries')}</td></tr>
+            <tr>
+              <td colSpan={4} style={{ color: 'var(--color-text-muted)', textAlign: 'center' }}>
+                {t('admin.schedule.noEntries')}
+              </td>
+            </tr>
           )}
           {events.map((ev) => (
             <tr key={ev.id}>
               <td>
-                {editId === ev.id
-                  ? <TimeSelect value={editData.time_from} onChange={(v) => setEditData({ ...editData, time_from: v })} style={{ width: 130 }} />
-                  : <span style={{ fontFamily: 'monospace' }}>{ev.time_from}</span>}
+                {editId === ev.id ? (
+                  <TimeSelect
+                    value={editData.time_from}
+                    onChange={(v) => setEditData({ ...editData, time_from: v })}
+                    style={{ width: 130 }}
+                  />
+                ) : (
+                  <span style={{ fontFamily: 'monospace' }}>{ev.time_from}</span>
+                )}
               </td>
               <td>
-                {editId === ev.id
-                  ? <TimeSelect value={editData.time_to} onChange={(v) => setEditData({ ...editData, time_to: v })} style={{ width: 130 }} />
-                  : <span style={{ fontFamily: 'monospace' }}>{ev.time_to || '—'}</span>}
+                {editId === ev.id ? (
+                  <TimeSelect
+                    value={editData.time_to}
+                    onChange={(v) => setEditData({ ...editData, time_to: v })}
+                    style={{ width: 130 }}
+                  />
+                ) : (
+                  <span style={{ fontFamily: 'monospace' }}>{ev.time_to || '—'}</span>
+                )}
               </td>
               <td>
-                {editId === ev.id
-                  ? <input className="input" style={{ padding: '4px 8px', width: '100%' }} value={editData.event} onChange={(e) => setEditData({ ...editData, event: e.target.value })} />
-                  : ev.event}
+                {editId === ev.id ? (
+                  <input
+                    className="input"
+                    style={{ padding: '4px 8px', width: '100%' }}
+                    value={editData.event}
+                    onChange={(e) => setEditData({ ...editData, event: e.target.value })}
+                  />
+                ) : (
+                  ev.event
+                )}
               </td>
               <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                 {editId === ev.id ? (
                   <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                    <button className="btn btn-primary btn-sm" onClick={saveEdit}>✓</button>
-                    <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>✕</button>
+                    <button className="btn btn-primary btn-sm" onClick={saveEdit}>
+                      ✓
+                    </button>
+                    <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
+                      ✕
+                    </button>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                    <button className="btn btn-secondary btn-sm" onClick={() => startEdit(ev)}>✎</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => del(ev.id)}>×</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => startEdit(ev)}>
+                      ✎
+                    </button>
+                    <button className="btn btn-danger btn-sm" onClick={() => del(ev.id)}>
+                      ×
+                    </button>
                   </div>
                 )}
               </td>
@@ -481,20 +636,42 @@ function ScheduleEventsEditor() {
         </tbody>
       </table>
 
-      <form onSubmit={add} style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+      <form
+        onSubmit={add}
+        style={{
+          display: 'flex',
+          gap: 'var(--spacing-sm)',
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
+        }}
+      >
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('admin.schedule.from')}</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+            {t('admin.schedule.from')}
+          </span>
           <TimeSelect value={newFrom} onChange={setNewFrom} required style={{ width: 150 }} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('admin.schedule.toOptional')}</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+            {t('admin.schedule.toOptional')}
+          </span>
           <TimeSelect value={newTo} onChange={setNewTo} style={{ width: 150 }} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('admin.schedule.event')}</span>
-          <input className="input" placeholder={t('admin.schedule.eventPlaceholder')} value={newEvent} onChange={(e) => setNewEvent(e.target.value)} required />
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+            {t('admin.schedule.event')}
+          </span>
+          <input
+            className="input"
+            placeholder={t('admin.schedule.eventPlaceholder')}
+            value={newEvent}
+            onChange={(e) => setNewEvent(e.target.value)}
+            required
+          />
         </label>
-        <button type="submit" className="btn btn-primary">{t('admin.schedule.add')}</button>
+        <button type="submit" className="btn btn-primary">
+          {t('admin.schedule.add')}
+        </button>
       </form>
     </div>
   );
@@ -509,18 +686,21 @@ function TicketsTab() {
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
-  const load = useCallback(() =>
-    api.adminGetTickets().then(setTickets), []);
+  const load = useCallback(() => api.adminGetTickets().then(setTickets), []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const addTicket = async (e) => {
     e.preventDefault();
-    setError(''); setMsg('');
+    setError('');
+    setMsg('');
     try {
       await api.adminAddTicket(nickName, ticketNumber);
       setMsg(t('admin.tickets.added'));
-      setNickName(''); setTicketNumber('');
+      setNickName('');
+      setTicketNumber('');
       load();
     } catch (err) {
       setError(err.message);
@@ -542,12 +722,30 @@ function TicketsTab() {
       <div style={{ marginBottom: 'var(--spacing-lg)' }}>
         <div className="card" style={{ maxWidth: 400 }}>
           <h2>{t('admin.tickets.walkUpTitle')}</h2>
-          <form onSubmit={addTicket} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-            <input className="input" placeholder={t('admin.tickets.nicknamePlaceholder')} value={nickName} onChange={(e) => setNickName(e.target.value)} required minLength={3} maxLength={30} />
-            <input className="input" placeholder={t('admin.tickets.ticketPlaceholder')} value={ticketNumber}
+          <form
+            onSubmit={addTicket}
+            style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}
+          >
+            <input
+              className="input"
+              placeholder={t('admin.tickets.nicknamePlaceholder')}
+              value={nickName}
+              onChange={(e) => setNickName(e.target.value)}
+              required
+              minLength={3}
+              maxLength={30}
+            />
+            <input
+              className="input"
+              placeholder={t('admin.tickets.ticketPlaceholder')}
+              value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value.replace(/\D/g, '').slice(0, 5))}
-              pattern="\d{5}" required />
-            <button type="submit" className="btn btn-primary">{t('admin.tickets.add')}</button>
+              pattern="\d{5}"
+              required
+            />
+            <button type="submit" className="btn btn-primary">
+              {t('admin.tickets.add')}
+            </button>
           </form>
         </div>
       </div>
@@ -571,10 +769,18 @@ function TicketsTab() {
                 <td>{t_.nick_name}</td>
                 <td style={{ fontFamily: 'monospace' }}>{t_.ticket_number}</td>
                 <td>{t_.is_walk_up ? '✓' : '—'}</td>
-                <td>{t_.claimed ? <span className="badge badge-success">{t('admin.tickets.yes')}</span> : <span className="badge badge-muted">{t('admin.tickets.no')}</span>}</td>
+                <td>
+                  {t_.claimed ? (
+                    <span className="badge badge-success">{t('admin.tickets.yes')}</span>
+                  ) : (
+                    <span className="badge badge-muted">{t('admin.tickets.no')}</span>
+                  )}
+                </td>
                 <td>
                   {!t_.race_time && (
-                    <button className="btn btn-danger btn-sm" onClick={() => deleteTicket(t_.id)}>×</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => deleteTicket(t_.id)}>
+                      ×
+                    </button>
                   )}
                 </td>
               </tr>
@@ -595,10 +801,11 @@ function SlotsTab() {
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
-  const load = useCallback(() =>
-    api.adminGetSlots().then(setSlots), []);
+  const load = useCallback(() => api.adminGetSlots().then(setSlots), []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const locale = getLocale(i18n.language);
   const fmt = (iso) => formatTime(iso, locale);
@@ -609,7 +816,8 @@ function SlotsTab() {
   };
 
   const saveEdit = async (id) => {
-    setError(''); setMsg('');
+    setError('');
+    setMsg('');
     const payload = { status: editData.status };
     if (editData.race_time) payload.race_time = editData.race_time;
     try {
@@ -643,14 +851,20 @@ function SlotsTab() {
                 <td style={{ fontWeight: 600 }}>{fmt(slot.start_time)}</td>
                 <td>
                   {editId === slot.id ? (
-                    <select className="input" style={{ padding: '4px 8px' }} value={editData.status}
-                      onChange={(e) => setEditData({ ...editData, status: e.target.value })}>
+                    <select
+                      className="input"
+                      style={{ padding: '4px 8px' }}
+                      value={editData.status}
+                      onChange={(e) => setEditData({ ...editData, status: e.target.value })}
+                    >
                       <option value="available">available</option>
                       <option value="booked">booked</option>
                       <option value="completed">completed</option>
                     </select>
                   ) : (
-                    <span className={`badge ${slot.status === 'available' ? 'badge-success' : slot.status === 'booked' ? 'badge-primary' : 'badge-muted'}`}>
+                    <span
+                      className={`badge ${slot.status === 'available' ? 'badge-success' : slot.status === 'booked' ? 'badge-primary' : 'badge-muted'}`}
+                    >
                       {slot.status}
                     </span>
                   )}
@@ -658,9 +872,13 @@ function SlotsTab() {
                 <td>{slot.participant_name || '—'}</td>
                 <td>
                   {editId === slot.id ? (
-                    <input className="input" style={{ padding: '4px 8px', width: '120px', fontFamily: 'monospace' }}
-                      placeholder="MM:SS.mmm" value={editData.race_time}
-                      onChange={(e) => setEditData({ ...editData, race_time: e.target.value })} />
+                    <input
+                      className="input"
+                      style={{ padding: '4px 8px', width: '120px', fontFamily: 'monospace' }}
+                      placeholder="MM:SS.mmm"
+                      value={editData.race_time}
+                      onChange={(e) => setEditData({ ...editData, race_time: e.target.value })}
+                    />
                   ) : (
                     <span style={{ fontFamily: 'monospace' }}>{slot.race_time || '—'}</span>
                   )}
@@ -668,11 +886,17 @@ function SlotsTab() {
                 <td>
                   {editId === slot.id ? (
                     <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="btn btn-primary btn-sm" onClick={() => saveEdit(slot.id)}>✓</button>
-                      <button className="btn btn-secondary btn-sm" onClick={() => setEditId(null)}>✕</button>
+                      <button className="btn btn-primary btn-sm" onClick={() => saveEdit(slot.id)}>
+                        ✓
+                      </button>
+                      <button className="btn btn-secondary btn-sm" onClick={() => setEditId(null)}>
+                        ✕
+                      </button>
                     </div>
                   ) : (
-                    <button className="btn btn-secondary btn-sm" onClick={() => startEdit(slot)}>{t('admin.slots.edit')}</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => startEdit(slot)}>
+                      {t('admin.slots.edit')}
+                    </button>
                   )}
                 </td>
               </tr>
@@ -693,8 +917,10 @@ function BracketTab() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([api.adminGetParticipants(), api.getBracket()])
-      .then(([p, b]) => { setParticipants(p); setEntries(b); });
+    Promise.all([api.adminGetParticipants(), api.getBracket()]).then(([p, b]) => {
+      setParticipants(p);
+      setEntries(b);
+    });
   }, []);
 
   const addEntry = (participantId, round, groupNumber) => {
@@ -702,15 +928,20 @@ function BracketTab() {
       (e) => e.participant_id === participantId && e.round === round
     );
     if (alreadyExists) return;
-    setEntries([...entries, { participant_id: participantId, round, group_number: groupNumber, position: null }]);
+    setEntries([
+      ...entries,
+      { participant_id: participantId, round, group_number: groupNumber, position: null },
+    ]);
   };
 
   const setPosition = (participantId, round, position) => {
-    setEntries(entries.map((e) =>
-      e.participant_id === participantId && e.round === round
-        ? { ...e, position: position ? parseInt(position) : null }
-        : e
-    ));
+    setEntries(
+      entries.map((e) =>
+        e.participant_id === participantId && e.round === round
+          ? { ...e, position: position ? parseInt(position) : null }
+          : e
+      )
+    );
   };
 
   const removeEntry = (participantId, round) => {
@@ -718,7 +949,8 @@ function BracketTab() {
   };
 
   const save = async () => {
-    setError(''); setMsg('');
+    setError('');
+    setMsg('');
     try {
       await api.adminUpdateBracket(entries);
       setMsg(t('admin.bracket.saved'));
@@ -736,44 +968,85 @@ function BracketTab() {
     <div>
       {msg && <p className="success-msg">{msg}</p>}
       {error && <p className="error-msg">{error}</p>}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 'var(--spacing-lg)',
+          marginBottom: 'var(--spacing-lg)',
+        }}
+      >
         <div className="card">
           <h2>{t('admin.bracket.semi1')}</h2>
-          <BracketGroup round="semifinal" groupNumber={1} entries={entries} participants={participants}
-            top8={top8} onAdd={addEntry} onRemove={removeEntry} onPosition={setPosition} />
+          <BracketGroup
+            round="semifinal"
+            groupNumber={1}
+            entries={entries}
+            participants={participants}
+            top8={top8}
+            onAdd={addEntry}
+            onRemove={removeEntry}
+            onPosition={setPosition}
+          />
         </div>
         <div className="card">
           <h2>{t('admin.bracket.semi2')}</h2>
-          <BracketGroup round="semifinal" groupNumber={2} entries={entries} participants={participants}
-            top8={top8} onAdd={addEntry} onRemove={removeEntry} onPosition={setPosition} />
+          <BracketGroup
+            round="semifinal"
+            groupNumber={2}
+            entries={entries}
+            participants={participants}
+            top8={top8}
+            onAdd={addEntry}
+            onRemove={removeEntry}
+            onPosition={setPosition}
+          />
         </div>
       </div>
       <div className="card">
         <h2>{t('admin.bracket.final')}</h2>
-        <BracketGroup round="final" groupNumber={null} entries={entries} participants={participants}
-          top8={top8} onAdd={addEntry} onRemove={removeEntry} onPosition={setPosition} />
+        <BracketGroup
+          round="final"
+          groupNumber={null}
+          entries={entries}
+          participants={participants}
+          top8={top8}
+          onAdd={addEntry}
+          onRemove={removeEntry}
+          onPosition={setPosition}
+        />
       </div>
-      <button className="btn btn-primary" onClick={save}>{t('admin.bracket.save')}</button>
+      <button className="btn btn-primary" onClick={save}>
+        {t('admin.bracket.save')}
+      </button>
     </div>
   );
 }
 
-function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, onRemove, onPosition }) {
+function BracketGroup({
+  round,
+  groupNumber,
+  entries,
+  participants,
+  top8,
+  onAdd,
+  onRemove,
+  onPosition,
+}) {
   const { t } = useTranslation();
   const groupEntries = entries.filter(
     (e) => e.round === round && (groupNumber === null || e.group_number === groupNumber)
   );
-  const groupParticipants = groupEntries.map((e) =>
-    participants.find((p) => p.id === e.participant_id)
-  ).filter(Boolean);
+  const groupParticipants = groupEntries
+    .map((e) => participants.find((p) => p.id === e.participant_id))
+    .filter(Boolean);
 
   const allRoundEntries = entries.filter((e) => e.round === round);
   const semifinalFinalists = entries
     .filter((e) => e.round === 'semifinal' && e.position != null && e.position <= 2)
     .map((e) => e.participant_id);
-  const pool = round === 'final'
-    ? participants.filter((p) => semifinalFinalists.includes(p.id))
-    : top8;
+  const pool =
+    round === 'final' ? participants.filter((p) => semifinalFinalists.includes(p.id)) : top8;
   const available = pool.filter((p) => !allRoundEntries.find((e) => e.participant_id === p.id));
 
   return (
@@ -783,11 +1056,19 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
         return (
           <div key={p.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ flex: 1 }}>{p.nick_name}</span>
-            <input type="number" min={1} max={4} placeholder={t('admin.bracket.placePlaceholder')}
+            <input
+              type="number"
+              min={1}
+              max={4}
+              placeholder={t('admin.bracket.placePlaceholder')}
               value={entry?.position || ''}
               onChange={(e) => onPosition(p.id, round, e.target.value)}
-              className="input" style={{ width: 70, padding: '4px 8px' }} />
-            <button className="btn btn-danger btn-sm" onClick={() => onRemove(p.id, round)}>×</button>
+              className="input"
+              style={{ width: 70, padding: '4px 8px' }}
+            />
+            <button className="btn btn-danger btn-sm" onClick={() => onRemove(p.id, round)}>
+              ×
+            </button>
           </div>
         );
       })}
@@ -795,19 +1076,31 @@ function BracketGroup({ round, groupNumber, entries, participants, top8, onAdd, 
         <select className="input" style={{ padding: '6px 8px' }} disabled>
           <option>{t('admin.bracket.semifinalFirst')}</option>
         </select>
-      ) : available.length > 0 && (
-        <select className="input" style={{ padding: '6px 8px' }}
-          onChange={(e) => { if (e.target.value) { onAdd(e.target.value, round, groupNumber); e.target.value = ''; } }}>
-          <option value="">{t('admin.bracket.addPlayer')}</option>
-          {available.map((p) => {
-            const rank = top8.findIndex((t_) => t_.id === p.id);
-            return (
-              <option key={p.id} value={p.id}>
-                {rank >= 0 ? `#${rank + 1} ` : ''}{p.nick_name}{p.race_time ? ` – ${p.race_time}` : ''}
-              </option>
-            );
-          })}
-        </select>
+      ) : (
+        available.length > 0 && (
+          <select
+            className="input"
+            style={{ padding: '6px 8px' }}
+            onChange={(e) => {
+              if (e.target.value) {
+                onAdd(e.target.value, round, groupNumber);
+                e.target.value = '';
+              }
+            }}
+          >
+            <option value="">{t('admin.bracket.addPlayer')}</option>
+            {available.map((p) => {
+              const rank = top8.findIndex((t_) => t_.id === p.id);
+              return (
+                <option key={p.id} value={p.id}>
+                  {rank >= 0 ? `#${rank + 1} ` : ''}
+                  {p.nick_name}
+                  {p.race_time ? ` – ${p.race_time}` : ''}
+                </option>
+              );
+            })}
+          </select>
+        )
       )}
     </div>
   );
@@ -846,10 +1139,14 @@ function ParticipantsTab() {
                 <td>{fmt(p.slot_time)}</td>
                 <td>
                   {p.slot_status ? (
-                    <span className={`badge ${p.slot_status === 'completed' ? 'badge-success' : p.slot_status === 'booked' ? 'badge-primary' : 'badge-muted'}`}>
+                    <span
+                      className={`badge ${p.slot_status === 'completed' ? 'badge-success' : p.slot_status === 'booked' ? 'badge-primary' : 'badge-muted'}`}
+                    >
                       {p.slot_status}
                     </span>
-                  ) : '—'}
+                  ) : (
+                    '—'
+                  )}
                 </td>
                 <td style={{ fontFamily: 'monospace' }}>{p.race_time || '—'}</td>
               </tr>
