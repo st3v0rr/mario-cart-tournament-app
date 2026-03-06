@@ -8,10 +8,12 @@ const db = require('../db');
 
 const router = express.Router();
 
-// Rate limit for self-registration: per IP to prevent mass account creation
+// Rate limit for self-registration: per IP+nick_name so shared NAT (conference WiFi)
+// doesn't block legitimate users — each nickname gets its own bucket per IP.
 const registerLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 5,
+  max: 20,
+  keyGenerator: (req) => `${req.ip}:${req.body?.nick_name || ''}`,
   message: { error: 'Zu viele Registrierungsversuche, bitte warte kurz.' },
   standardHeaders: true,
   legacyHeaders: false,
