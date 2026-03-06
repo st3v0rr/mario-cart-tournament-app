@@ -124,6 +124,11 @@
   "admin.setup.createSlots": "Slots erstellen",
   "admin.setup.dbInitialized": "Datenbank erfolgreich initialisiert.",
   "admin.setup.seedSuccess": "{{count}} Slots erfolgreich erstellt.",
+  "admin.setup.rescheduleTitle": "Datum verschieben",
+  "admin.setup.rescheduleHint": "Aendert das Datum aller vorhandenen Slots. Die Uhrzeiten bleiben unveraendert.",
+  "admin.setup.rescheduleSuccess": "{{count}} Slots auf neues Datum verschoben.",
+  "admin.setup.rescheduling": "Wird verschoben...",
+  "admin.setup.reschedule": "Datum aendern",
 
   "admin.schedule.title": "Programmablauf",
   "admin.schedule.hint": "Wird auf dem Display im Zeitplan angezeigt.",

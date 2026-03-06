@@ -544,6 +544,41 @@ router.post(
   }
 );
 
+// PATCH /api/admin/setup/reschedule — verschiebt alle Slots auf ein neues Datum
+router.patch(
+  '/setup/reschedule',
+  [
+    body('new_date')
+      .matches(/^\d{4}-\d{2}-\d{2}$/)
+      .withMessage('new_date muss im Format YYYY-MM-DD sein'),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
+    const { new_date } = req.body;
+
+    const slotCount = db.prepare('SELECT COUNT(*) as c FROM slots').get().c;
+    if (slotCount === 0) {
+      return res.status(409).json({ error: 'Keine Slots vorhanden' });
+    }
+
+    const result = db
+      .prepare("UPDATE slots SET start_time = ? || SUBSTR(start_time, 11) WHERE SUBSTR(start_time, 1, 10) != ?")
+      .run(new_date, new_date);
+
+    console.log('[AUDIT] admin_reschedule', {
+      ip: req.ip,
+      adminId: req.user.sub,
+      new_date,
+      updated: result.changes,
+      ts: new Date().toISOString(),
+    });
+
+    res.json({ ok: true, updated: result.changes });
+  }
+);
+
 // DELETE /api/admin/setup/slots
 router.delete('/setup/slots', (req, res) => {
   const booked = db

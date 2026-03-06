@@ -69,6 +69,7 @@ export const api = {
   adminSetupStatus: () => request('GET', '/admin/setup/status'),
   adminMigrate: () => request('POST', '/admin/setup/migrate'),
   adminSeedSlots: (data) => request('POST', '/admin/setup/seed', data),
+  adminReschedule: (data) => request('PATCH', '/admin/setup/reschedule', data),
   adminClearSlots: () => request('DELETE', '/admin/setup/slots'),
   adminResetDatabase: () => request('DELETE', '/admin/setup/database', { confirm: 'RESET' }),
 };

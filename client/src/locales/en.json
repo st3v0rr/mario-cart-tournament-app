@@ -124,6 +124,11 @@
   "admin.setup.createSlots": "Create slots",
   "admin.setup.dbInitialized": "Database initialized successfully.",
   "admin.setup.seedSuccess": "{{count}} slots created successfully.",
+  "admin.setup.rescheduleTitle": "Reschedule",
+  "admin.setup.rescheduleHint": "Changes the date of all existing slots. Times remain unchanged.",
+  "admin.setup.rescheduleSuccess": "{{count}} slots moved to new date.",
+  "admin.setup.rescheduling": "Rescheduling...",
+  "admin.setup.reschedule": "Change date",
 
   "admin.schedule.title": "Programme",
   "admin.schedule.hint": "Displayed on the TV screen in the schedule.",

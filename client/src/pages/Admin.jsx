@@ -95,6 +95,11 @@ function SetupTab() {
   const [seedError, setSeedError] = useState('');
   const [seeding, setSeeding] = useState(false);
 
+  const [rescheduleDate, setRescheduleDate] = useState(today);
+  const [rescheduleMsg, setRescheduleMsg] = useState('');
+  const [rescheduleError, setRescheduleError] = useState('');
+  const [rescheduling, setRescheduling] = useState(false);
+
   const loadStatus = useCallback(() => {
     setStatusError('');
     api.adminSetupStatus()
@@ -144,6 +149,20 @@ function SetupTab() {
       setSeedError(e.message);
     } finally {
       setSeeding(false);
+    }
+  };
+
+  const runReschedule = async (e) => {
+    e.preventDefault();
+    setRescheduleMsg(''); setRescheduleError(''); setRescheduling(true);
+    try {
+      const res = await api.adminReschedule({ new_date: rescheduleDate });
+      setRescheduleMsg(t('admin.setup.rescheduleSuccess', { count: res.updated }));
+      loadStatus();
+    } catch (e) {
+      setRescheduleError(e.message);
+    } finally {
+      setRescheduling(false);
     }
   };
 
@@ -272,6 +291,33 @@ function SetupTab() {
         </form>
 
       </div>
+
+      {/* Reschedule */}
+      {status?.slot_count > 0 && (
+        <div className="card">
+          <h2>{t('admin.setup.rescheduleTitle')}</h2>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)' }}>
+            {t('admin.setup.rescheduleHint')}
+          </p>
+          <form onSubmit={runReschedule} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', maxWidth: 440 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('admin.setup.raceDay')}</span>
+              <input
+                type="date"
+                className="input"
+                value={rescheduleDate}
+                onChange={(e) => setRescheduleDate(e.target.value)}
+                required
+              />
+            </label>
+            {rescheduleMsg && <p className="success-msg">{rescheduleMsg}</p>}
+            {rescheduleError && <p className="error-msg">{rescheduleError}</p>}
+            <button type="submit" className="btn btn-primary" disabled={rescheduling}>
+              {rescheduling ? t('admin.setup.rescheduling') : t('admin.setup.reschedule')}
+            </button>
+          </form>
+        </div>
+      )}
 
       <ScheduleEventsEditor />
 
