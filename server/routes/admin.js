@@ -564,7 +564,9 @@ router.patch(
     }
 
     const result = db
-      .prepare("UPDATE slots SET start_time = ? || SUBSTR(start_time, 11) WHERE SUBSTR(start_time, 1, 10) != ?")
+      .prepare(
+        'UPDATE slots SET start_time = ? || SUBSTR(start_time, 11) WHERE SUBSTR(start_time, 1, 10) != ?'
+      )
       .run(new_date, new_date);
 
     console.log('[AUDIT] admin_reschedule', {
