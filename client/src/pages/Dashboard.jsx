@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState('');
+  const [cancelConfirming, setCancelConfirming] = useState(false);
 
   const reload = () => api.getMe().then(setData).catch((err) => setError(err.message));
 
@@ -22,6 +23,7 @@ export default function Dashboard() {
     setCancelling(true);
     try {
       await api.cancelSlot(data.slot.id);
+      setCancelConfirming(false);
       await reload();
     } catch (err) {
       setCancelError(err.message);
@@ -59,13 +61,21 @@ export default function Dashboard() {
             )}
             {data.slot.status === 'booked' && (
               <div style={{ marginTop: 'var(--spacing-sm)' }}>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                >
-                  {cancelling ? t('dashboard.cancelling') : t('dashboard.cancelSlot')}
-                </button>
+                {cancelConfirming ? (
+                  <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('slots.cancelConfirm')}</span>
+                    <button className="btn btn-danger btn-sm" onClick={handleCancel} disabled={cancelling}>
+                      {cancelling ? t('dashboard.cancelling') : t('dashboard.cancelSlot')}
+                    </button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setCancelConfirming(false)} disabled={cancelling}>
+                      {t('common.back')}
+                    </button>
+                  </div>
+                ) : (
+                  <button className="btn btn-danger btn-sm" onClick={() => setCancelConfirming(true)}>
+                    {t('dashboard.cancelSlot')}
+                  </button>
+                )}
                 {cancelError && <p className="error-msg" style={{ marginTop: 'var(--spacing-xs)' }}>{cancelError}</p>}
               </div>
             )}
@@ -93,13 +103,31 @@ export default function Dashboard() {
       {data.bracket?.length > 0 && (
         <div className="card">
           <h2>{t('dashboard.bracket')}</h2>
-          {data.bracket.map((b, i) => (
-            <div key={i}>
-              <strong>{b.round === 'semifinal' ? t('dashboard.semifinal') : t('dashboard.final')}</strong>
-              {b.group_number && ` · ${t('dashboard.group')} ${b.group_number}`}
-              {b.position && ` · ${t('dashboard.place')} ${b.position}`}
-            </div>
-          ))}
+          {data.bracket.map((b, i) => {
+            const isWinner = b.round === 'final' && b.position === 1;
+            return (
+              <div key={i} style={{ marginTop: i > 0 ? 'var(--spacing-sm)' : 0 }}>
+                <p style={{ fontSize: '2rem', fontWeight: 700, margin: 0 }}>
+                  {b.round === 'semifinal' ? t('dashboard.semifinal') : t('dashboard.final')}
+                  <span style={{ color: b.round === 'final' ? 'var(--color-gold)' : 'var(--color-primary)', marginLeft: 8 }}>
+                    {b.round === 'semifinal' ? '🔥' : '🏆'}
+                  </span>
+                </p>
+                {(b.group_number || b.position) && (
+                  <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>
+                    {b.group_number && `${t('dashboard.group')} ${b.group_number}`}
+                    {b.group_number && b.position && ' · '}
+                    {b.position && `${t('dashboard.place')} ${b.position}`}
+                  </p>
+                )}
+                {isWinner && (
+                  <p style={{ color: 'var(--color-gold)', fontWeight: 700, marginTop: 4 }}>
+                    {t('dashboard.winner')}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

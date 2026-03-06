@@ -14,6 +14,7 @@ export default function Slots() {
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
+  const [cancelConfirming, setCancelConfirming] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -41,32 +42,11 @@ export default function Slots() {
     return slotTime > new Date(Date.now() + 10 * 60 * 1000);
   };
 
-  const canCancel = (slot) => {
-    if (!mySlot || mySlot.id !== slot.id) return false;
-    if (slot.status !== 'booked') return false;
-    const slotTime = new Date(slot.start_time);
-    return slotTime > new Date(Date.now() + 10 * 60 * 1000);
-  };
-
   const book = async (id) => {
     setActionId(id); setError(''); setMsg('');
     try {
       await api.bookSlot(id);
       setMsg(t('slots.bookSuccess'));
-      await load();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setActionId(null);
-    }
-  };
-
-  const cancel = async (id) => {
-    if (!confirm(t('slots.cancelConfirm'))) return;
-    setActionId(id); setError(''); setMsg('');
-    try {
-      await api.cancelSlot(id);
-      setMsg(t('slots.cancelSuccess'));
       await load();
     } catch (err) {
       setError(err.message);
@@ -92,6 +72,41 @@ export default function Slots() {
         <div className="card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
           <strong>{t('slots.mySlot')}</strong> {formatTime(mySlot.start_time, locale)}{clockSuffix ? ` ${clockSuffix}` : ''}
           <span className="badge badge-primary" style={{ marginLeft: 8 }}>{t('slots.booked')}</span>
+          {mySlot.status === 'booked' && (
+            <div style={{ marginTop: 'var(--spacing-sm)' }}>
+              {cancelConfirming ? (
+                <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('slots.cancelConfirm')}</span>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    disabled={actionId === mySlot.id}
+                    onClick={async () => {
+                      setActionId(mySlot.id); setError(''); setMsg('');
+                      try {
+                        await api.cancelSlot(mySlot.id);
+                        setMsg(t('slots.cancelSuccess'));
+                        setCancelConfirming(false);
+                        await load();
+                      } catch (err) {
+                        setError(err.message);
+                      } finally {
+                        setActionId(null);
+                      }
+                    }}
+                  >
+                    {t('slots.cancel')}
+                  </button>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setCancelConfirming(false)}>
+                    {t('common.back')}
+                  </button>
+                </div>
+              ) : (
+                <button className="btn btn-danger btn-sm" onClick={() => setCancelConfirming(true)}>
+                  {t('slots.cancel')}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
       {error && <p className="error-msg">{error}</p>}
@@ -110,26 +125,15 @@ export default function Slots() {
               {slot.race_time && (
                 <div className="slot-race-time">{slot.race_time}</div>
               )}
-              {auth?.role === 'participant' && (
+              {auth?.role === 'participant' && canBook(slot) && (
                 <div className="slot-actions">
-                  {canBook(slot) && (
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => book(slot.id)}
-                      disabled={actionId === slot.id}
-                    >
-                      {t('slots.book')}
-                    </button>
-                  )}
-                  {canCancel(slot) && (
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => cancel(slot.id)}
-                      disabled={actionId === slot.id}
-                    >
-                      {t('slots.cancel')}
-                    </button>
-                  )}
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => book(slot.id)}
+                    disabled={actionId === slot.id}
+                  >
+                    {t('slots.book')}
+                  </button>
                 </div>
               )}
             </div>
