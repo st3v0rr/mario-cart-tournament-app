@@ -48,9 +48,7 @@ export default function Rules() {
         <h2 className="lb-mobile-title">{t('rules.title')}</h2>
         {loading && <p className="rules-loading">{t('common.loading')}</p>}
         {error && <p className="error-msg">{error}</p>}
-        {!loading && !error && content === '' && (
-          <p className="rules-empty">{t('rules.empty')}</p>
-        )}
+        {!loading && !error && content === '' && <p className="rules-empty">{t('rules.empty')}</p>}
         {!loading && !error && content !== '' && (
           <div
             className="markdown-body"
