@@ -600,6 +600,39 @@ router.delete('/setup/slots', (req, res) => {
   res.json({ ok: true });
 });
 
+const SUPPORTED_LANGS = ['de', 'en'];
+
+// GET /api/admin/rules?lang=de
+router.get('/rules', (req, res) => {
+  const lang = SUPPORTED_LANGS.includes(req.query.lang) ? req.query.lang : 'de';
+  const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(`rules_${lang}`);
+  res.json({ content: row?.value ?? '' });
+});
+
+// PUT /api/admin/rules?lang=de
+router.put(
+  '/rules',
+  [body('content').isString().withMessage('content must be a string')],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
+    const lang = SUPPORTED_LANGS.includes(req.query.lang) ? req.query.lang : 'de';
+    const { content } = req.body;
+    db.prepare('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)').run(
+      `rules_${lang}`,
+      content
+    );
+    console.log('[AUDIT] admin_update_rules', {
+      ip: req.ip,
+      adminId: req.user.sub,
+      lang,
+      ts: new Date().toISOString(),
+    });
+    res.json({ ok: true });
+  }
+);
+
 // DELETE /api/admin/setup/database — löscht alle Daten aus allen Tabellen
 router.delete(
   '/setup/database',

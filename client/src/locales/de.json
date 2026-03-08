@@ -34,6 +34,7 @@
   "login.switchToLogin": "Anmelden",
   "login.noAccount": "Noch kein Account?",
   "login.registerNow": "Jetzt registrieren",
+  "login.rulesLink": "Turnierregeln",
   "login.leaderboard": "Rangliste",
   "login.finals": "Finals",
   "login.admin": "Admin",
@@ -103,6 +104,7 @@
   "admin.tab.slots": "Slots",
   "admin.tab.participants": "Teilnehmer",
   "admin.tab.bracket": "Bracket",
+  "admin.tab.rules": "Regeln",
   "admin.tab.setup": "⚙ Setup",
 
   "admin.setup.dbStatus": "Datenbank-Status",
@@ -179,6 +181,19 @@
   "admin.bracket.placePlaceholder": "Platz",
   "admin.bracket.addPlayer": "+ Spieler hinzufügen",
   "admin.bracket.semifinalFirst": "Erst Platzierungen im Halbfinale eintragen",
+
+  "admin.rules.title": "Turnierregeln",
+  "admin.rules.hint": "Markdown wird unterstuetzt. Die Regeln sind oeffentlich fuer alle Teilnehmer einsehbar.",
+  "admin.rules.edit": "Bearbeiten",
+  "admin.rules.preview": "Vorschau",
+  "admin.rules.placeholder": "Regeln hier eingeben (Markdown wird unterstuetzt)...",
+  "admin.rules.previewEmpty": "Kein Inhalt zum Anzeigen.",
+  "admin.rules.save": "Speichern",
+  "admin.rules.saving": "Wird gespeichert...",
+  "admin.rules.saved": "Regeln gespeichert.",
+
+  "rules.title": "Turnierregeln",
+  "rules.empty": "Noch keine Regeln hinterlegt.",
 
   "admin.participants.colName": "Name",
   "admin.participants.colTicket": "Ticket",

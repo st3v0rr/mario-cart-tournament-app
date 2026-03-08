@@ -52,6 +52,9 @@ export const api = {
   // Schedule (public)
   getSchedule: () => request('GET', '/schedule'),
 
+  // Rules (public)
+  getRules: (lang) => request('GET', `/rules?lang=${lang}`),
+
   // Admin
   adminGetTickets: () => request('GET', '/admin/tickets'),
   adminAddTicket: (nick_name, ticket_number) =>
@@ -61,6 +64,10 @@ export const api = {
   adminUpdateSlot: (id, data) => request('PATCH', `/admin/slots/${id}`, data),
   adminUpdateBracket: (entries) => request('PATCH', '/admin/bracket', { entries }),
   adminGetParticipants: () => request('GET', '/admin/participants'),
+
+  // Admin rules
+  adminGetRules: (lang) => request('GET', `/admin/rules?lang=${lang}`),
+  adminUpdateRules: (lang, content) => request('PUT', `/admin/rules?lang=${lang}`, { content }),
 
   // Admin schedule
   adminGetSchedule: () => request('GET', '/admin/schedule'),

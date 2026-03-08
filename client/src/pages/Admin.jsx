@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
 import { useTranslation } from 'react-i18next';
 import { getLocale, formatTime, formatTimeOrDash, formatDateTimeOrDash } from '../utils/locale';
+import { renderMarkdown } from '../utils/markdown';
 import './Admin.css';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -45,7 +46,7 @@ function TimeSelect({ value, onChange, required, style }) {
   );
 }
 
-const TAB_IDS = ['tickets', 'slots', 'participants', 'bracket'];
+const TAB_IDS = ['tickets', 'slots', 'participants', 'bracket', 'rules'];
 
 export default function Admin() {
   const [tab, setTab] = useState('tickets');
@@ -77,6 +78,7 @@ export default function Admin() {
         {tab === 'slots' && <SlotsTab />}
         {tab === 'bracket' && <BracketTab />}
         {tab === 'participants' && <ParticipantsTab />}
+        {tab === 'rules' && <RulesTab />}
       </div>
     </div>
   );
@@ -1153,6 +1155,130 @@ function ParticipantsTab() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+const RULES_LANGS = ['de', 'en'];
+
+// --- Regeln ---
+function RulesTab() {
+  const { t } = useTranslation();
+  const [lang, setLang] = useState('de');
+  const [contents, setContents] = useState({ de: '', en: '' });
+  const [previewMode, setPreviewMode] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    RULES_LANGS.forEach((l) => {
+      api
+        .adminGetRules(l)
+        .then((data) => setContents((prev) => ({ ...prev, [l]: data.content ?? '' })))
+        .catch((e) => setError(e.message));
+    });
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMsg('');
+    setError('');
+    try {
+      await api.adminUpdateRules(lang, contents[lang]);
+      setMsg(t('admin.rules.saved'));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const switchLang = (l) => {
+    setLang(l);
+    setMsg('');
+    setPreviewMode(false);
+  };
+
+  return (
+    <div className="card">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 'var(--spacing-sm)',
+          marginBottom: 'var(--spacing-md)',
+        }}
+      >
+        <div>
+          <h2 style={{ margin: 0 }}>{t('admin.rules.title')}</h2>
+          <p style={{ margin: '4px 0 0', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+            {t('admin.rules.hint')}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
+          {RULES_LANGS.map((l) => (
+            <button
+              key={l}
+              className={`btn ${lang === l ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => switchLang(l)}
+            >
+              {l.toUpperCase()}
+            </button>
+          ))}
+          <span style={{ borderLeft: '1px solid rgba(255,255,255,0.15)', margin: '0 4px' }} />
+          <button
+            className={`btn ${previewMode ? 'btn-secondary' : 'btn-primary'}`}
+            onClick={() => setPreviewMode(false)}
+          >
+            {t('admin.rules.edit')}
+          </button>
+          <button
+            className={`btn ${previewMode ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setPreviewMode(true)}
+          >
+            {t('admin.rules.preview')}
+          </button>
+        </div>
+      </div>
+
+      {!previewMode ? (
+        <textarea
+          key={lang}
+          className="input rules-editor-textarea"
+          value={contents[lang]}
+          onChange={(e) => setContents((prev) => ({ ...prev, [lang]: e.target.value }))}
+          placeholder={t('admin.rules.placeholder')}
+          rows={24}
+          spellCheck={false}
+        />
+      ) : (
+        <div
+          className="rules-preview markdown-body"
+          dangerouslySetInnerHTML={{
+            __html:
+              renderMarkdown(contents[lang]) ||
+              `<p style="color:var(--color-text-muted)">${t('admin.rules.previewEmpty')}</p>`,
+          }}
+        />
+      )}
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--spacing-md)',
+          marginTop: 'var(--spacing-md)',
+        }}
+      >
+        <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+          {saving ? t('admin.rules.saving') : t('admin.rules.save')}
+        </button>
+        {msg && <span className="success-msg">{msg}</span>}
+        {error && <span className="error-msg">{error}</span>}
       </div>
     </div>
   );

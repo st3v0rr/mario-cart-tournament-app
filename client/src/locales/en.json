@@ -34,6 +34,7 @@
   "login.switchToLogin": "Sign in",
   "login.noAccount": "No account yet?",
   "login.registerNow": "Register now",
+  "login.rulesLink": "Tournament Rules",
   "login.leaderboard": "Leaderboard",
   "login.finals": "Finals",
   "login.admin": "Admin",
@@ -103,6 +104,7 @@
   "admin.tab.slots": "Slots",
   "admin.tab.participants": "Participants",
   "admin.tab.bracket": "Bracket",
+  "admin.tab.rules": "Rules",
   "admin.tab.setup": "⚙ Setup",
 
   "admin.setup.dbStatus": "Database Status",
@@ -179,6 +181,19 @@
   "admin.bracket.placePlaceholder": "Place",
   "admin.bracket.addPlayer": "+ Add player",
   "admin.bracket.semifinalFirst": "Enter semifinal placements first",
+
+  "admin.rules.title": "Tournament Rules",
+  "admin.rules.hint": "Supports Markdown. The rules are publicly accessible to all participants.",
+  "admin.rules.edit": "Edit",
+  "admin.rules.preview": "Preview",
+  "admin.rules.placeholder": "Enter rules here (Markdown is supported)...",
+  "admin.rules.previewEmpty": "No content to display.",
+  "admin.rules.save": "Save",
+  "admin.rules.saving": "Saving...",
+  "admin.rules.saved": "Rules saved.",
+
+  "rules.title": "Tournament Rules",
+  "rules.empty": "No rules have been set yet.",
 
   "admin.participants.colName": "Name",
   "admin.participants.colTicket": "Ticket",

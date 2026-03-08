@@ -9,6 +9,7 @@ import Bracket from './pages/Bracket';
 import Display from './pages/Display';
 import AdminLogin from './pages/AdminLogin';
 import Admin from './pages/Admin';
+import Rules from './pages/Rules';
 import Nav from './components/Nav';
 import './App.css';
 
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/display" element={<Display />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/bracket" element={<Bracket />} />
+        <Route path="/rules" element={<Rules />} />
 
         <Route
           path="/"

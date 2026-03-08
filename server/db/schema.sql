@@ -36,3 +36,8 @@ CREATE TABLE IF NOT EXISTS schedule_events (
   event TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT ''
+);

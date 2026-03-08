@@ -1,0 +1,70 @@
+.rules-loading,
+.rules-empty {
+  color: var(--color-text-muted);
+  padding: var(--spacing-lg) 0;
+}
+
+/* Markdown rendered output — used in public rules page */
+.lb-mobile-content .markdown-body h1 {
+  font-size: 1.4rem;
+  margin: 0 0 var(--spacing-sm);
+  color: var(--color-primary);
+}
+
+.lb-mobile-content .markdown-body h2 {
+  font-size: 1.15rem;
+  margin: var(--spacing-md) 0 var(--spacing-sm);
+  color: var(--color-text);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+.lb-mobile-content .markdown-body h3 {
+  font-size: 1rem;
+  margin: var(--spacing-sm) 0 4px;
+  color: var(--color-text);
+}
+
+.lb-mobile-content .markdown-body p {
+  margin: 0 0 var(--spacing-sm);
+  line-height: 1.65;
+}
+
+.lb-mobile-content .markdown-body ul {
+  margin: 0 0 var(--spacing-sm);
+  padding-left: var(--spacing-lg);
+}
+
+.lb-mobile-content .markdown-body li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+
+.lb-mobile-content .markdown-body strong {
+  font-weight: 700;
+}
+
+.lb-mobile-content .markdown-body em {
+  font-style: italic;
+}
+
+.lb-mobile-content .markdown-body code {
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.lb-mobile-content .markdown-body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.lb-mobile-content .markdown-body a:hover {
+  opacity: 0.8;
+}
+
+.lb-mobile-content .markdown-body .md-spacer {
+  height: var(--spacing-sm);
+}

@@ -13,6 +13,7 @@ const bracketRoutes = require('./routes/bracket');
 const meRoutes = require('./routes/me');
 const adminRoutes = require('./routes/admin');
 const scheduleRoutes = require('./routes/schedule');
+const rulesRoutes = require('./routes/rules');
 const errorHandler = require('./middleware/errorHandler');
 
 // Run migrations on startup
@@ -31,6 +32,13 @@ try {
   _db.prepare('ALTER TABLE schedule_events ADD COLUMN time_from TEXT NOT NULL DEFAULT ""').run();
 } catch (_) {
   /* column already exists */
+}
+try {
+  _db.exec(
+    "CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL DEFAULT '')"
+  );
+} catch (_) {
+  /* table already exists */
 }
 try {
   _db.prepare('ALTER TABLE schedule_events ADD COLUMN time_to TEXT').run();
@@ -138,6 +146,7 @@ app.use('/api/bracket', bracketRoutes);
 app.use('/api/me', meRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/rules', rulesRoutes);
 
 // Serve React in production
 if (isProduction) {

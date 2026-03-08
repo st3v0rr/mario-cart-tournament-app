@@ -209,6 +209,8 @@ export default function Login() {
           )}
         </div>
         <div className="login-links">
+          <Link to="/rules">{t('login.rulesLink')}</Link>
+          <span>·</span>
           <Link to="/leaderboard">{t('login.leaderboard')}</Link>
           <span>·</span>
           <Link to="/bracket">{t('login.finals')}</Link>
